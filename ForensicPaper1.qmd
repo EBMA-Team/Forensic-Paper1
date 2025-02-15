@@ -1,0 +1,303 @@
+---
+title: "Application of forensic meta-science to selected orthopaedic papers: Paper 1 10.1177/0363546506296042 (Pincewski et al 2007)"
+author: "Corey Scholes"
+affiliation: "EBM Analytics"
+version: 1.0
+date: "2025-Feb-15"
+date-modified: "2025-Feb-15"
+type: website
+editor: visual
+code-annotations: true
+execute: 
+  echo: false
+  warning: false
+  message: false
+format:
+  html:
+    toc: true
+    number-sections: true
+    code-fold: true
+    
+bibliography: ForensicPapers.bib
+---
+
+# Analysis Preamble
+
+This analysis acts as a training activity to apply techniques described in [Heathers 2024](https://jamesheathers.curve.space/).
+
+I will extend this approach, by encapsulating a review within the contemporary reporting guidelines for the trial reported in the paper in question.
+
+## Preparation
+
+Load up required packages in advance. Citations applied to each library at first use in the text.
+
+```{r}
+
+if (!require("pacman")) install.packages("pacman")
+pacman::p_load(
+  "synthesisr",
+  "reshape",
+  "future",
+  "furrr",
+  "memoise",
+  "googlesheets4",
+  "openxlsx2",
+  "readr",
+  "purrr",
+  "tidyverse",
+  "tidymodels",
+  "tidytext",
+  "stopwords",
+  "tictoc",
+  "lubridate",
+  "forcats",
+  "gt",
+  "consort",
+  "gtsummary",
+  "flextable",
+  "survival",
+  "ggplot2",
+  "ggdist",
+  "ggsurvfit",
+  "ggfortify",
+  "mice",
+  "marginaleffects",
+  "patchwork",
+  "naniar",
+  "quantreg",
+  "broom",
+  "broom.helpers",
+  "labelled",
+  "epoxy",
+  "broom.mixed",
+  "lme4",
+  "janitor",
+  "progressr",
+  "DT",
+  install = TRUE,
+  update = FALSE
+)
+
+```
+
+# Selected Citation
+
+Pinczewski, L. A., Lyman, J., Salmon, L. J., Russell, V. J., Roe, J., & Linklater, J. (2007). A 10-year comparison of anterior cruciate ligament reconstructions with hamstring tendon and patellar tendon autograft: a controlled, prospective trial. *The American Journal of Sports Medicine*, *35*(4), 564–574.
+
+doi: 10.1177/0363546506296042
+
+[@pinczewski2007]
+
+# Selection Rationale
+
+The selected paper appears at number 2 in "The top 100 most cited articles in Australian orthopaedic surgery" [@mcmillan2024].
+
+It has been cited 288 times (pubmed) or 524 times (crossref), depending on which citation database you trust the most.
+
+[![Metrics of selected citation as of 15-Feb-2025](images/AJSM Metrics.png)](https://journals.sagepub.com/doi/10.1177/0363546506296042)
+
+# Bibliometric Analysis
+
+## The paper
+
+## The authors
+
+Retraction Watch
+
+PubPeer
+
+# Reporting Framework
+
+To provide some structure to the following scrutiny of this article - the following guidelines were utilised.
+
+CONSORT 2010 - [@moher2010]
+
+CONSORT Parallel group trials - [@moher2010; @consort2010]
+
+CONSORT Nonpharmacologic treatments - [@boutron2017]
+
+CONSORT PRO - [@calvert2013]
+
+CONSORT Harms - [@junqueira2023]
+
+# Trial Information
+
+## CONSORT \[23\] Registration
+
+## CONSORT \[24\] Trial Protocol
+
+## CONSORT \[25\] Funding
+
+# Title and Abstract
+
+## CONSORT \[1a\] Trial Identification
+
+## CONSORT \[1b\] Structured summary
+
+<!--# Structured summary of trial design, methods, results, and conclusions -->
+
+<!--# P1b: The PRO should be identified in the abstract as a primary or secondary outcome -->
+
+# Introduction
+
+## CONSORT \[2a\] Scientific Background and Explanation
+
+<!--# Including background and rationale for PRO assessment -->
+
+## CONSORT \[2b\] Specific Objectives or Hypotheses
+
+<!--# P2b: The PRO hypothesis should be stated and relevant domains identified, if applicable -->
+
+# Methods - External assessment
+
+This paper has been put through the wringer by countless SR-MA of graft type in ACL reconstruction. Let's do a quick summary of what others have said about the methods through RoB or methodology assessments in previous reviews.
+
+I retrieved the citation list for this paper from *citationchaser* (the shiny app, I couldnt load the package because it kept tripping my antivirus) [@Haddaway2022]. It conducts a search through lens.org.
+
+```{r}
+
+Citations <- synthesisr::read_refs(
+  filename = "C:/Users/cscho//Documents/GitHub/Forensic-Paper1/Paper1Citations",
+  tag_naming = "wos",
+  return_df = TRUE,
+  verbose = TRUE
+)
+
+```
+
+Filter down for recent systematic reviews
+
+```{r}
+
+CitationsSR <- Citations |> dplyr::filter(
+  stringr::str_detect(title,"(systematic.*review)|(meta.*analysis)")
+) |> dplyr::arrange(
+  year,
+  descending = FALSE
+)
+
+```
+
+## Risk of Bias
+
+One systematic review [@janssen2017] used the Cochrane library checklist for RCTs, with two reviewers conducting independent ratings. Interestingly, the authors classified this trial as a *clinical controlled trial* (no formal randomisation) rather than a *randomised controlled trial*. The overall rating from the combined checklist score was *Questionable (*score was between 30% and 50%).
+
+A more recent review [@sollberger2022] attempted to assess long term results after ACLR with PT vs HS autograft with a min follow up of 10 years, but did not include this paper.
+
+Another review [@migliorini2020] included it in their quality assessment, but did not break down their RoB ratings by individual paper.
+
+# Methods - Trial Design
+
+## CONSORT \[3a\] Description of trial design
+
+<!--# Include allocation ratio -->
+
+## CONSORT \[3b\] Changes to methods after trial commencement
+
+# Methods - Participants
+
+## CONSORT \[4a\] Eligibility criteria
+
+## CONSORT \[4b\] Settings and locations of data collection
+
+<!--# why is this important - retrieve from guidance and elaboration -->
+
+# Methods - Interventions
+
+## CONSORT \[5\] Interventions for each Group
+
+# Methods - Outcomes
+
+## CONSORT \[6a\] Primary and Secondary
+
+<!--# Completely defined pre-specified primary and secondary outcome measures, including how and when they were assessed -->
+
+## CONSORT \[6b\] Changes after commencement
+
+# Methods - Sample size
+
+## CONSORT \[7a\] Determination
+
+## CONSORT \[7b\] Interim Analyses and Stopping
+
+# Methods - Randomisation
+
+## CONSORT \[8a\] Sequence Method
+
+## CONSORT \[8b\] Sequence Type
+
+<!--# Type of randomisation; details of any restriction (such as blocking and block size) -->
+
+## CONSORT \[9\] Allocation concealment
+
+<!--# Mechanism used to implement the random allocation sequence (such as sequentially numbered containers),describing any steps taken to conceal the sequence until interventions were assigned -->
+
+## CONSORT \[10\] Implementation
+
+<!--# Who generated the random allocation sequence, who enrolled participants, and who assigned participants to interventions -->
+
+## CONSORT \[11a\] Blinding (Who)
+
+<!--# If done, who was blinded after assignment to interventions (for example, participants, care providers, those assessing outcomes) and how -->
+
+## CONSORT \[11b\] Intervention Similarity
+
+# Methods - Statistical Methods
+
+## CONSORT \[12a\] Comparison Between Groups
+
+## CONSORT \[12b\] Additional Analyses
+
+<!--# Methods for additional analyses, such as subgroup analyses and adjusted analyses -->
+
+# Results
+
+## CONSORT \[13a\] Participant Flow
+
+<!--# For each group, the numbers of participants who were randomly assigned, received intended treatment, and were analysed for the primary outcome -->
+
+## CONSORT \[13b\] Losses and Exclusions per Group
+
+<!--# For each group, losses and exclusions after randomisation, together with reasons -->
+
+## CONSORT \[14a\] Recruitment Period
+
+<!--# Dates defining the periods of recruitment and follow-up -->
+
+## CONSORT \[14b\] Trial Termination
+
+<!--# Why the trial ended or was stopped -->
+
+## CONSORT \[15\] Baseline Data
+
+<!--# A table showing baseline demographic and clinical characteristics for each group -->
+
+## CONSORT \[16\] Numbers Analysed
+
+<!--# For each group, number of participants (denominator) included in each analysis and whether the analysis was by original assigned groups -->
+
+## CONSORT \[17a\] Outcomes and Estimation
+
+<!--# For each primary and secondary outcome, results for each group, and the estimated effect size and its precision (such as 95% confidence interval) -->
+
+## CONSORT \[17a2\] Outcomes Omitted
+
+<!--# For outcomes omitted from the trial report (benefits and harms), provide rationale for not reporting and indicate where the data on omitted outcomes can be accessed -->
+
+## CONSORT \[17b\] Binary Outcomes
+
+<!--# For binary outcomes, presentation of both absolute and relative effect sizes is recommended -->
+
+## CONSORT \[18\] Ancillary Analyses
+
+<!--# Results of any other analyses performed, including subgroup analyses and adjusted analyses, distinguishing pre-specified from exploratory -->
+
+## CONSORT \[19\] Harms
+
+# Discussion
+
+## CONSORT \[20\] Limitations
+
+## CONSORT \[21\] Generalisability
+
+## CONSORT \[22\] Interpretation
