@@ -131,7 +131,7 @@ The selected paper appears at number 2 in "The top 100 most cited articles in Au
 
 It has been cited 288 times (pubmed) or 524 times (crossref), depending on which citation database you trust the most.
 
-[![Metrics of selected citation as of 15-Feb-2025](AJSM Metrics.png)](https://journals.sagepub.com/doi/10.1177/0363546506296042)
+[![Metrics of selected citation as of 15-Feb-2025](AJSM%20Metrics.png)](https://journals.sagepub.com/doi/10.1177/0363546506296042)
 
 # Bibliometric Analysis
 
@@ -149,9 +149,6 @@ RWPaper <- Retractions |> dplyr::filter(
 
 ```
 
-
-
-
 ```{r}
 
 if_else(
@@ -160,8 +157,8 @@ if_else(
   epoxy::epoxy("There were {nrow(RWPaper)} retractions identified")
 )
 ```
-There were 0 comments for this paper on PubPeer [ 15-Feb-2025].
 
+There were 0 comments for this paper on PubPeer \[ 15-Feb-2025\].
 
 ## The authors
 
@@ -280,6 +277,7 @@ search_retractions_by_authors <- function(author_names,
 
 
 ```
+
 ```{r}
 # Extract just family names
 author_surnames <- TargetCitation$data$author[[1]] %>%
@@ -290,7 +288,6 @@ author_full_names <- TargetCitation$data$author[[1]] %>%
   mutate(full_name = paste(given, family)) %>%
   pull(full_name)
 ```
-
 
 ```{r}
 # Example usage:
@@ -309,14 +306,13 @@ View(RWAuthors$matches)
 print(RWAuthors$summary)
 ```
 
-
-PubPeer
-
 # Reporting Framework
 
 To provide some structure to the following scrutiny of this article - the following guidelines were utilised.
 
 CONSORT 2010 - [@moher2010]
+
+CONSORT Abstracts - [@hopewell2008]
 
 CONSORT Parallel group trials - [@moher2010; @consort2010]
 
@@ -328,21 +324,47 @@ CONSORT Harms - [@junqueira2023]
 
 # Trial Information
 
+So first things first, this study is not a randomised trial. In the methods, it's described as a "prospective controlled trial".
+
 ## CONSORT \[23\] Registration
+
+No prior trial registration.
 
 ## CONSORT \[24\] Trial Protocol
 
+This gets a little bit more interesting. The protocol is not described fully in this paper, but is somewhat described throughout the multiple previous papers from the same trial. As far as I can tell though, there was no protocol published prior to the first follow up paper.
+
+Study with follow up at 7 years - [@roe2005]
+
+Study with follow up at 5 years - [@pinczewski2002]
+
 ## CONSORT \[25\] Funding
+
+Funding provided by
+
+-   The Australian Institute of Musculoskeletal Research
+
+    -   A local not-for-profit entity to support research within a group of surgeons in which the senior author was a key influencer
+
+-   Smith and Nephew Endoscopy
+
+    -   Manufacturer of the fixation and surgical instrumentation for the ACL reconstruction procedures
+
+    -   Fund fellowships for less experienced surgeons to train under the senior author
 
 # Title and Abstract
 
 ## CONSORT \[1a\] Trial Identification
+
+The title identifies the study as a "prospective controlled trial".
 
 ## CONSORT \[1b\] Structured summary
 
 <!--# Structured summary of trial design, methods, results, and conclusions -->
 
 <!--# P1b: The PRO should be identified in the abstract as a primary or secondary outcome -->
+
+The PROs used in the study are *not* identified in the abstract as primary or secondary outcomes in the trial.
 
 # Introduction
 
@@ -352,11 +374,13 @@ CONSORT Harms - [@junqueira2023]
 
 ## CONSORT \[2b\] Specific Objectives or Hypotheses
 
+<!--# Specific objectives or hypotheses for outcomes of benefits and harms -->
+
 <!--# P2b: The PRO hypothesis should be stated and relevant domains identified, if applicable -->
 
 # Methods - External assessment
 
-This paper has been put through the wringer by SR-MA of graft type in ACL reconstruction. Let's do a quick summary of what others have said about the methods through RoB or methodology assessments in previous reviews.
+This paper should have been put through the wringer by SR-MA of graft type in ACL reconstruction. Let's do a quick summary of what others have said about the methods through RoB or methodology assessments in previous reviews.
 
 I retrieved the citation list for this paper from *citationchaser* (the shiny app, I couldnt load the package because it kept tripping my antivirus) [@Haddaway2022]. It conducts a search through lens.org.
 
@@ -397,15 +421,54 @@ Another review [@migliorini2020] included it in their quality assessment, but di
 
 <!--# Include allocation ratio -->
 
+Prospective controlled trial.
+
+This doesnt really have any meaning. Is it that the HS group is being compared to the PT control? Let's assume that's the case. This is really an interrupted cohort study, or an interrupted time series.
+
+<!--# Come back to this later -->
+
 ## CONSORT \[3b\] Changes to methods after trial commencement
+
+<!--# Come back and check this -->
+
+Changes to eligibility may have altered or been reinterpreted at some point after trial commencement.
 
 # Methods - Participants
 
 ## CONSORT \[4a\] Eligibility criteria
 
+Recreate eligibility for clarity
+
+| Category | Inclusion | Exclusion |
+|------------------------|------------------------|------------------------|
+| Patient | Desire return to competitive activity |  |
+| Pathology | Complete ACL rupture | Additional ligament injury such that reconstruction was deemed necessary |
+|  | Grade 2 Lachman (or above) | Chondral damage |
+|  | Positive pivot shift |  |
+| Treatment |  | Meniscal damage such that meniscectomy of \>1/3 of one (medial or lateral) meniscus was required |
+| Other | Failed nonoperative treatment | Previous meniscectomy |
+|  |  | Abnormal radiographic image |
+|  |  | Abnormal contralateral knee |
+|  |  | Patients seeking compensation for their injury |
+|  |  | Patients who did not wish to participate in a research program |
+
+<!--# The representativeness of the sample is questionable -->
+
+Yes, the representativeness of the sample is questionable for reasons.
+
+<!--# Does a trial need to be representative? -->
+
+A trial of this type need not be representative, as the aims of a trial are to "Provide evidence for **relative** treatment effectiveness over an adequate time horizon for assessing target patient outcomes" ([Harrell, 2023](https://www.fharrell.com/post/rct-mimic/ "RCT generalisability")). Harrell goes on to note that knowledge of the relative effect from an RCT combined with the absolute risk of an outcome from observational data can be combined to assess individual treatment efficacy. Others have observed that treatment effects remain the same even when trial participants differ from the target population [@bradburn2020]. Still others have argued against the ingrained notion in clinical science that representative patient samples are the only mechanism by which findings can be appropriately generalised [@rothman2013].
+
+The authors *have* mentioned that the trial can be used to establish a baseline of outcomes in this population, and I think this an overreach given the limitations on its external validity.
+
+<!--# When applicable, eligibility criteria for centers and for care providers -->
+
+Single-centre and single-surgeon study, eligibility criteria for centres and care providers not required.
+
 ## CONSORT \[4b\] Settings and locations of data collection
 
-<!--# why is this important - retrieve from guidance and elaboration -->
+<!--# why is this important - retrieve from guidance and elaboration. "Information...is crucial to judge the applicability and generalisability of the trial. Other aspects...may also affect a study's external validity. -->
 
 # Methods - Interventions
 
@@ -417,7 +480,25 @@ Another review [@migliorini2020] included it in their quality assessment, but di
 
 <!--# Completely defined pre-specified primary and secondary outcome measures, including how and when they were assessed -->
 
+| Category | Outcome | Type | Comments |
+|------------------|-------------------|------------------|------------------|
+| Adverse Events | **Ipsilateral graft intact** | Time to event |  |
+|  | Contralateral ligament intact | Binary; Time to event |  |
+|  | Ipsilateral adverse events (complications) | Binary |  |
+|  | Ipsilateral further surgery | Binary |  |
+|  | Harvest site symptoms | Ordinal |  |
+| Subjective symptoms | **Symptoms with strenuous activity (IKDC)** | Ordinal |  |
+|  | Lysholm Knee Score | Continuous |  |
+|  | Sports participation | Binary |  |
+|  | Knee-related reduction in activity | Binary |  |
+|  | Kneeling pain | Continuous |  |
+| Objective testing | **Lachman Grade** | Ordinal |  |
+|  | Pivot Shift | Binary |  |
+|  | Instrumented Laxity | Binary |  |
+
 ## CONSORT \[6b\] Changes after commencement
+
+This is one of the key weaknesses of this work - the outcomes have been switched from one paper to the next based on interest over time. With no firm primary outcome stated early on in the reporting process or pre-specified, it is entirely possible that reported outcomes have been prioritised based on i) altered levels of interest over time or ii) levels of significance at the time of comparison.
 
 # Methods - Sample size
 
@@ -426,6 +507,12 @@ Another review [@migliorini2020] included it in their quality assessment, but di
 ## CONSORT \[7b\] Interim Analyses and Stopping
 
 # Methods - Randomisation
+
+No randomisation took place.
+
+<!--# Why the results cannot be intrepreted the same way as an RCT -->
+
+<!--# What could have been done to strengthen the comparisons  -->
 
 ## CONSORT \[8a\] Sequence Method
 
@@ -446,6 +533,8 @@ Another review [@migliorini2020] included it in their quality assessment, but di
 <!--# If done, who was blinded after assignment to interventions (for example, participants, care providers, those assessing outcomes) and how -->
 
 ## CONSORT \[11b\] Intervention Similarity
+
+Not applicable
 
 # Methods - Statistical Methods
 
