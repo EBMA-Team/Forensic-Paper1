@@ -35,6 +35,10 @@ Load up required packages in advance. Citations applied to each library at first
 
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(
+  "gert",
+  "rcrossref",
+  "httr",
+  "jsonlite",
   "synthesisr",
   "reshape",
   "future",
@@ -80,13 +84,46 @@ pacman::p_load(
 
 ```
 
+## Pull Retraction Watch
+
+```{r}
+
+# Set the repository URL and local path
+repo_url <- "https://gitlab.com/crossref/retraction-watch-data"
+local_path <- "~/GitHub/retraction-watch-data"  # This will create a folder in your working directory
+
+# Clone the repository
+git_clone(url = repo_url, path = local_path)
+```
+
+```{r}
+
+# Update the repository (equivalent to git pull)
+git_pull(repo = local_path)
+
+
+```
+
+Load in database
+
+```{r}
+Retractions <- read.csv(file.path(local_path, "retraction_watch.csv"))
+```
+
 # Selected Citation
 
-Pinczewski, L. A., Lyman, J., Salmon, L. J., Russell, V. J., Roe, J., & Linklater, J. (2007). A 10-year comparison of anterior cruciate ligament reconstructions with hamstring tendon and patellar tendon autograft: a controlled, prospective trial. *The American Journal of Sports Medicine*, *35*(4), 564–574.
-
-doi: 10.1177/0363546506296042
-
 [@pinczewski2007]
+
+```{r}
+
+targetDOI = "10.1177/0363546506296042"
+```
+
+```{epoxy}
+
+Full citation is - {rcrossref::cr_cn(dois = targetDOI, format = "text", style = "apa")}
+
+```
 
 # Selection Rationale
 
@@ -94,15 +131,184 @@ The selected paper appears at number 2 in "The top 100 most cited articles in Au
 
 It has been cited 288 times (pubmed) or 524 times (crossref), depending on which citation database you trust the most.
 
-[![Metrics of selected citation as of 15-Feb-2025](images/AJSM Metrics.png)](https://journals.sagepub.com/doi/10.1177/0363546506296042)
+[![Metrics of selected citation as of 15-Feb-2025](AJSM Metrics.png)](https://journals.sagepub.com/doi/10.1177/0363546506296042)
 
 # Bibliometric Analysis
 
 ## The paper
 
+Check if it appears in the RW database
+
+```{r}
+
+TargetCitation <- rcrossref::cr_works(dois = "10.1177/0363546506296042")
+
+RWPaper <- Retractions |> dplyr::filter(
+  stringr::str_detect(OriginalPaperDOI,targetDOI) 
+)
+
+```
+
+
+
+
+```{r}
+
+if_else(
+  length(RWPaper) < 1,
+  "No Retraction Found",
+  epoxy::epoxy("There were {nrow(RWPaper)} retractions identified")
+)
+```
+There were 0 comments for this paper on PubPeer [ 15-Feb-2025].
+
+
 ## The authors
 
 Retraction Watch
+
+Function to retrieve potential retractions
+
+```{r}
+library(tidyverse)
+library(stringr)
+library(stringdist)
+
+search_retractions_by_authors <- function(author_names, 
+                                        retraction_data, 
+                                        fuzzy_threshold = 0.2,
+                                        date_from = NULL,
+                                        date_to = NULL) {
+  
+  # Convert author names to lowercase for case-insensitive matching
+  author_names_lower <- tolower(author_names)
+  
+  # Process retraction data
+  matching_retractions <- retraction_data %>%
+    # Convert dates to proper format
+    mutate(
+      RetractionDate = as.Date(RetractionDate, format = "%m/%d/%Y"),
+      OriginalPaperDate = as.Date(OriginalPaperDate, format = "%m/%d/%Y")
+    ) %>%
+    # Apply date filters if provided
+    {if (!is.null(date_from)) filter(., RetractionDate >= as.Date(date_from)) else .} %>%
+    {if (!is.null(date_to)) filter(., RetractionDate <= as.Date(date_to)) else .} %>%
+    # Convert Author column to lowercase for matching
+    mutate(authors_lower = tolower(Author))
+  
+  # Function to find exact matches
+  find_exact_matches <- function(author_string, search_names) {
+    matches <- search_names[sapply(search_names, function(name) {
+      str_detect(author_string, str_c("\\b", name, "\\b"))
+    })]
+    str_c(matches, collapse = "; ")
+  }
+  
+  # Function to find fuzzy matches
+  find_fuzzy_matches <- function(author_string, search_names, threshold) {
+    # Split author string into individual names
+    individual_authors <- str_split(author_string, ";")[[1]] %>%
+      str_trim()
+    
+    # Check each search name against each individual author
+    matches <- search_names[sapply(search_names, function(search_name) {
+      min_dist <- min(stringdist(individual_authors, search_name, method = "jw"))
+      min_dist <= threshold
+    })]
+    
+    str_c(unique(matches), collapse = "; ")
+  }
+  
+  # Perform matching and create results
+  results <- matching_retractions %>%
+    # Find exact matches
+    mutate(
+      exact_matches = map_chr(authors_lower, ~find_exact_matches(., author_names_lower))
+    ) %>%
+    # Find fuzzy matches
+    mutate(
+      fuzzy_matches = map_chr(authors_lower, ~find_fuzzy_matches(., author_names_lower, fuzzy_threshold))
+    ) %>%
+    # Keep rows with either exact or fuzzy matches
+    filter(exact_matches != "" | fuzzy_matches != "") %>%
+    # Select and arrange columns
+    select(
+      Title,
+      Author,
+      exact_matches,
+      fuzzy_matches,
+      Journal,
+      Publisher,
+      Country,
+      RetractionDate,
+      OriginalPaperDate,
+      RetractionDOI,
+      OriginalPaperDOI,
+      Reason,
+      everything(),
+      -authors_lower
+    )
+  
+  # Generate summary statistics
+  summary_stats <- list(
+    total_matches = nrow(results),
+    matches_by_year = results %>%
+      mutate(year = format(RetractionDate, "%Y")) %>%
+      count(year, name = "retractions") %>%
+      arrange(desc(year)),
+    matches_by_publisher = results %>%
+      count(Publisher, sort = TRUE, name = "retractions"),
+    matches_by_country = results %>%
+      count(Country, sort = TRUE, name = "retractions"),
+    exact_vs_fuzzy = c(
+      exact = sum(results$exact_matches != ""),
+      fuzzy_only = sum(results$exact_matches == "" & results$fuzzy_matches != "")
+    ),
+    date_range = c(
+      min = min(results$RetractionDate, na.rm = TRUE),
+      max = max(results$RetractionDate, na.rm = TRUE)
+    )
+  )
+  
+  # Return both results and summary statistics
+  return(list(
+    matches = results,
+    summary = summary_stats
+  ))
+}
+
+
+
+```
+```{r}
+# Extract just family names
+author_surnames <- TargetCitation$data$author[[1]] %>%
+  pull(family)
+
+# Or for full names (combining given and family)
+author_full_names <- TargetCitation$data$author[[1]] %>%
+  mutate(full_name = paste(given, family)) %>%
+  pull(full_name)
+```
+
+
+```{r}
+# Example usage:
+RWAuthors <- search_retractions_by_authors(
+  author_surnames,
+  Retractions,
+  fuzzy_threshold = 0.9,
+  date_from = "2004-01-01",
+  date_to = "2024-12-31"
+)
+
+# # View matches
+View(RWAuthors$matches)
+# 
+# # View summary statistics
+print(RWAuthors$summary)
+```
+
 
 PubPeer
 
@@ -150,7 +356,7 @@ CONSORT Harms - [@junqueira2023]
 
 # Methods - External assessment
 
-This paper has been put through the wringer by countless SR-MA of graft type in ACL reconstruction. Let's do a quick summary of what others have said about the methods through RoB or methodology assessments in previous reviews.
+This paper has been put through the wringer by SR-MA of graft type in ACL reconstruction. Let's do a quick summary of what others have said about the methods through RoB or methodology assessments in previous reviews.
 
 I retrieved the citation list for this paper from *citationchaser* (the shiny app, I couldnt load the package because it kept tripping my antivirus) [@Haddaway2022]. It conducts a search through lens.org.
 
@@ -172,17 +378,16 @@ Filter down for recent systematic reviews
 CitationsSR <- Citations |> dplyr::filter(
   stringr::str_detect(title,"(systematic.*review)|(meta.*analysis)")
 ) |> dplyr::arrange(
-  year,
-  descending = FALSE
+  year
 )
 
 ```
 
 ## Risk of Bias
 
-One systematic review [@janssen2017] used the Cochrane library checklist for RCTs, with two reviewers conducting independent ratings. Interestingly, the authors classified this trial as a *clinical controlled trial* (no formal randomisation) rather than a *randomised controlled trial*. The overall rating from the combined checklist score was *Questionable (*score was between 30% and 50%).
+One systematic review [@janssen2017] used the Cochrane library checklist for RCTs, with two reviewers conducting independent ratings. The authors classified this trial as a *clinical controlled trial* (no formal randomisation) rather than a *randomised controlled trial*. The overall rating from the combined checklist score was *Questionable (*score was between 30% and 50%).
 
-A more recent review [@sollberger2022] attempted to assess long term results after ACLR with PT vs HS autograft with a min follow up of 10 years, but did not include this paper.
+A more recent review [@sollberger2022] attempted to assess long term results after ACLR with PT vs HS autograft with a min follow up of 10 years, but did not include this paper in their analysis.
 
 Another review [@migliorini2020] included it in their quality assessment, but did not break down their RoB ratings by individual paper.
 
