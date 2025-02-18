@@ -35,6 +35,7 @@ Load up required packages in advance. Citations applied to each library at first
 
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(
+  "PropCIs",
   "gert",
   "rcrossref",
   "httr",
@@ -89,11 +90,11 @@ pacman::p_load(
 ```{r}
 
 # Set the repository URL and local path
-repo_url <- "https://gitlab.com/crossref/retraction-watch-data"
+#repo_url <- "https://gitlab.com/crossref/retraction-watch-data"
 local_path <- "~/GitHub/retraction-watch-data"  # This will create a folder in your working directory
 
 # Clone the repository
-git_clone(url = repo_url, path = local_path)
+#git_clone(url = repo_url, path = local_path)
 ```
 
 ```{r}
@@ -328,7 +329,7 @@ So first things first, this study is not a randomised trial. In the methods, it'
 
 ## CONSORT \[23\] Registration
 
-No prior trial registration.
+No prior trial registration in clinicaltrials.gov.
 
 ## CONSORT \[24\] Trial Protocol
 
@@ -337,6 +338,8 @@ This gets a little bit more interesting. The protocol is not described fully in 
 Study with follow up at 7 years - [@roe2005]
 
 Study with follow up at 5 years - [@pinczewski2002]
+
+The role of a data monitoring committee.
 
 ## CONSORT \[25\] Funding
 
@@ -409,7 +412,7 @@ CitationsSR <- Citations |> dplyr::filter(
 
 ## Risk of Bias
 
-One systematic review [@janssen2017] used the Cochrane library checklist for RCTs, with two reviewers conducting independent ratings. The authors classified this trial as a *clinical controlled trial* (no formal randomisation) rather than a *randomised controlled trial*. The overall rating from the combined checklist score was *Questionable (*score was between 30% and 50%).
+One systematic review [@janssen2017] used the Cochrane library checklist for RCTs, with two reviewers conducting independent ratings. The authors classified this trial as a *clinical controlled trial* (no formal randomisation). The overall rating from the combined checklist score was *Questionable (*score was between 30% and 50%).
 
 A more recent review [@sollberger2022] attempted to assess long term results after ACLR with PT vs HS autograft with a min follow up of 10 years, but did not include this paper in their analysis.
 
@@ -439,18 +442,18 @@ Changes to eligibility may have altered or been reinterpreted at some point afte
 
 Recreate eligibility for clarity
 
-| Category | Inclusion | Exclusion |
-|------------------------|------------------------|------------------------|
-| Patient | Desire return to competitive activity |  |
-| Pathology | Complete ACL rupture | Additional ligament injury such that reconstruction was deemed necessary |
-|  | Grade 2 Lachman (or above) | Chondral damage |
-|  | Positive pivot shift |  |
-| Treatment |  | Meniscal damage such that meniscectomy of \>1/3 of one (medial or lateral) meniscus was required |
-| Other | Failed nonoperative treatment | Previous meniscectomy |
-|  |  | Abnormal radiographic image |
-|  |  | Abnormal contralateral knee |
-|  |  | Patients seeking compensation for their injury |
-|  |  | Patients who did not wish to participate in a research program |
+| Category | Inclusion | Exclusion | Comments |
+|------------------|------------------|------------------|-------------------|
+| Patient | Desire return to competitive activity |  |  |
+| Pathology | Complete ACL rupture | Additional ligament injury such that reconstruction was deemed necessary |  |
+|  | Grade 2 Lachman (or above) | Chondral damage |  |
+|  | Positive pivot shift |  |  |
+| Treatment |  | Meniscal damage such that meniscectomy of \>1/3 of one (medial or lateral) meniscus was required |  |
+| Other | Failed nonoperative treatment | Previous meniscectomy |  |
+|  |  | Abnormal radiographic image |  |
+|  |  | Abnormal contralateral knee |  |
+|  |  | Patients seeking compensation for their injury |  |
+|  |  | Patients who did not wish to participate in a research program |  |
 
 <!--# The representativeness of the sample is questionable -->
 
@@ -458,7 +461,7 @@ Yes, the representativeness of the sample is questionable for reasons.
 
 <!--# Does a trial need to be representative? -->
 
-A trial of this type need not be representative, as the aims of a trial are to "Provide evidence for **relative** treatment effectiveness over an adequate time horizon for assessing target patient outcomes" ([Harrell, 2023](https://www.fharrell.com/post/rct-mimic/ "RCT generalisability")). Harrell goes on to note that knowledge of the relative effect from an RCT combined with the absolute risk of an outcome from observational data can be combined to assess individual treatment efficacy. Others have observed that treatment effects remain the same even when trial participants differ from the target population [@bradburn2020]. Still others have argued against the ingrained notion in clinical science that representative patient samples are the only mechanism by which findings can be appropriately generalised [@rothman2013].
+A trial of this type need not be representative, as the aims of a trial are to "Provide evidence for **relative** treatment effectiveness over an adequate time horizon for assessing target patient outcomes" ([Harrell, 2023](https://www.fharrell.com/post/rct-mimic/ "RCT generalisability")). Harrell goes on to note that knowledge of the relative effect from an RCT combined with the absolute risk of an outcome from observational data can be combined to assess individual treatment efficacy. Others have observed that treatment effects can remain the same even when trial participants differ from the target population [@bradburn2020], this needs to be replicated in our present context here though. Still others have argued against the ingrained notion in clinical science that representative patient samples are the only mechanism by which findings can be appropriately generalised [@rothman2013].
 
 The authors *have* mentioned that the trial can be used to establish a baseline of outcomes in this population, and I think this an overreach given the limitations on its external validity.
 
@@ -498,17 +501,37 @@ Single-centre and single-surgeon study, eligibility criteria for centres and car
 
 ## CONSORT \[6b\] Changes after commencement
 
-This is one of the key weaknesses of this work - the outcomes have been switched from one paper to the next based on interest over time. With no firm primary outcome stated early on in the reporting process or pre-specified, it is entirely possible that reported outcomes have been prioritised based on i) altered levels of interest over time or ii) levels of significance at the time of comparison.
+Outcome switching from trial plan - commencement to analysis and reporting is problematic in trials [@altman2017]. This is one of the key weaknesses of this work - the outcomes have been potentially switched from one paper to the next based on interest over time. With no firm primary outcome stated early on in the reporting process or pre-specified, it is entirely possible that reported outcomes have been prioritised based on i) altered levels of interest over time or ii) levels of significance at the time of comparison.
 
 # Methods - Sample size
 
+This is the biggest mystery of this paper I think. The methods description is very clear about what the sample size is, but really nothing about how it was determined. The only mention of power is in the discussion of [@pinczewski2002] to say that the study is underpowered for detecting a difference in graft rupture.
+
+Ultimately, I can run some simulations here to prove the point, but I just dont think this study was adequately powered for any of the comparisons it has made between the groups.
+
 ## CONSORT \[7a\] Determination
+
+Not described.
 
 ## CONSORT \[7b\] Interim Analyses and Stopping
 
+The series of papers making up reporting of this trial really needed a more comprehensive approach to stopping parameters and planning for interim analyses, at what turned out to be 5, 7 and 10 year follow ups.
+
+Interim analyses for efficacy allow a trial to be stopped early [@ciolino2023]. With the benefit of hindsight, there are a number of issues with long-term follow up of ACL reconstruction that confound a comparison between graft types at such a long follow up period. Namely, the incidence and severity of osteoarthritis present in each group. Considering the quality of reconstruction is one (arguably minor) component of osteoarthritis after ACL rupture, the validity of the comparison could be questioned.
+
+In defence of the authors, the natural history of post-ACL rupture OA was still a developing concept when this study was implemented. Nevertheless, the lack of planning of longer-term followup or interim analyses and how they are compensated in the comparisons needs to be addressed in more detail.
+
 # Methods - Randomisation
 
-No randomisation took place.
+This was an attempted RCT that failed due to recruitment refusal.\
+\
+"*On October 28, 1993, we began a prospective randomized study of consenting patients who met the required criteria. However, by April 10, 1994, although 52 patients had been randomized, no further patients agreed to participate in randomization. This was because the patients were noticing, through comments from the physical therapist, that the use of hamstring tendon graft led to a more rapid recovery from surgery.*" [@pinczewski2002]
+
+I dont even know what to do with this.
+
+Clinical equipoise (didnt exist it seems)
+
+Patient selection - exclusivity (patients were self-selected based on perioperative care and functional constraints imposed)
 
 <!--# Why the results cannot be intrepreted the same way as an RCT -->
 
@@ -538,7 +561,59 @@ Not applicable
 
 # Methods - Statistical Methods
 
+The analysis description in this paper, definitively comparing graft types in ACLR reconstruction, is a total of four sentences. I just don't think this would (or should) pass muster in the contemporary period.
+
+The data structure clearly has dependency within patients over time points, but is likely under-sampled to cater for a fully specified model (mixed effects). See *Sample Size.*
+
+Let's breakdown each sentence;
+
+*The outcomes were compared between the two groups at 10 years using the Mann-Whitney U test for the continuous measurements (KT1000, range of motion, Lysholm score) and ordered categorical variables (such as IKDC categories).*
+
+Well, this is a cracking start - theoretically an MW U test can be applied to ordinal categorical responses, but gee-whiz, there are better approaches to use, particularly in this context. First of all, how were ties between groups corrected for? I suspect they werent and that means for a study that was probably already on the limits of power for the implied comparisons, using this test in this way chips away at what little power remained. Also, many of the variables are binary responses, which this test really wouldnt be appropriate for.
+
+Second, "at 10 years" is a bit misleading, as comparisons at the earlier time points are also made.
+
+*Wilcoxon signed rank test was used to assess changes* *over time.*
+
+Combining t-tests like this for within and between-group comparisons is quite the sign that a more comprehensive model should be employed here.
+
+*Linear regression analysis was used to assess relationship between selected dependent and independent variables.*
+
+So close, yet so far - linear regression gets a guernsey, but not to do with anything related to the aims of the paper. Almost made it.
+
+*Statistical significance was assessed at the 5% level.*
+
+While this is good to know, there are lots of other details we need before we get to this.
+
 ## CONSORT \[12a\] Comparison Between Groups
+
+<!--# P12a: Statistical approaches for dealing with missing data are explicitly stated -->
+
+There are a metric tonne of comparisons between groups in this paper. Let's see if we can table up what we're looking at.
+
+Data assumption was non-parametric. <!--# Come back to this -->
+
+| Category | Outcome | Type | Model - Test | Comments |
+|-------------|----------------|-----------|--------------|--------------------|
+| Adverse Events | **Ipsilateral graft intact** | Time to event | Nil (KM used to establish survival rates) | A risk table would have been helpful |
+|  | Contralateral ligament intact | Binary; Time to event | Nil (KM used to establish survival rates) | A risk table would have been helpful |
+|  | Ipsilateral adverse events (complications) | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
+|  | Ipsilateral further surgery | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
+|  | Harvest site symptoms | Ordinal | Between-Group: Mann-Whitney U Test |  |
+| Subjective symptoms | **Symptoms with strenuous activity (IKDC)** | Ordinal | Between-Group: Mann-Whitney U Test |  |
+|  | Lysholm Knee Score | Continuous | Between-Group: Mann-Whitney U Test |  |
+|  | Sports participation | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
+|  | Knee-related reduction in activity | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
+|  | Kneeling pain | Continuous | Between-Group: Mann-Whitney U Test |  |
+| Objective testing | **Lachman Grade** | Ordinal | Between-Group: Mann-Whitney U Test |  |
+|  | Pivot Shift | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
+|  | Instrumented Laxity | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
+|  | Range of motion - extension | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
+|  | Single-leg hop test | Binary | Nil |  |
+| Operative Findings | Meniscal Injury | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
+|  | Meniscal Treatment | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
+| Radiographic | IKDC grading x-ray | Ordinal | Between-Group: Mann-Whitney U Test |  |
+| Composite | IDEAL outcome | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
 
 ## CONSORT \[12b\] Additional Analyses
 
@@ -546,9 +621,23 @@ Not applicable
 
 # Results
 
+Let's roll through the results by section and make some notes as we go.
+
 ## CONSORT \[13a\] Participant Flow
 
 <!--# For each group, the numbers of participants who were randomly assigned, received intended treatment, and were analysed for the primary outcome -->
+
+Some general comments are;
+
+-   The participant flow is explained in text, but this would be so much easier to understand with a flow chart. Especially trying to understand who was eligible for which outcomes at which follow up. I assume they didnt ask graft failure patients to be included at the post-failure timepoints for example.
+
+-   There is clearly a concerted effort to retrieve patients (in some form) at 5 years, compared to the 4 year followup (Table 1 [@pinczewski2002]).
+
+-   There is a risk of survivor bias in the PROMs assessment at 10 years with \~25% of cases failed by then. What would happen if a comparison were made based on ITT?
+
+<!--# The number of PRO outcome data at baseline and at subsequent time points should be made transparent -->
+
+The followup of patients at the final timepoint is noted in the follow-up section. This could be communicated more effectively with a comprehensive flowchart incorporating all published timepoints.
 
 ## CONSORT \[13b\] Losses and Exclusions per Group
 
@@ -558,13 +647,103 @@ Not applicable
 
 <!--# Dates defining the periods of recruitment and follow-up -->
 
+PT Group - Jan-1993 to Apr-1994
+
+HT Group - Oct-93 to Nov-1994
+
+The authors state "senior author...after Apr-1994..used the HT graft exclusively". Does this comparison not include the learning curve for HT? Why not recruit HT group after Apr-1994?
+
 ## CONSORT \[14b\] Trial Termination
 
 <!--# Why the trial ended or was stopped -->
 
+No description of trial termination in the methods. However, there is a section in [@pinczewski2002] talking about abandoning the trial due to recruitment failure (see *Randomisation*).
+
 ## CONSORT \[15\] Baseline Data
 
 <!--# A table showing baseline demographic and clinical characteristics for each group -->
+
+<!--# Including baseline PRO data when collected -->
+
+```{r}
+Group1 = list(
+  FemaleCount = 42,
+  AgeMedian = 25,
+  AgeMin = 13,
+  AgeMax = 42
+)
+Group1$AgeSDEst = (Group1$AgeMax-Group1$AgeMin)/2
+
+Group2 = list(
+  FemaleCount = 43,
+  AgeMedian = 24,
+  AgeMin = 13,
+  AgeMax = 52
+)
+Group2$AgeSDEst = (Group2$AgeMax-Group2$AgeMin)/2
+
+
+```
+
+Well, first of all - I'm not sure this would pass HREC in this day and age. ACL reconstruction in skeletally immature individuals is quite the different set of ethical considerations to adults and I'm not sure that would pass muster in the present environment. Considering the narrowness of the inclusion critera, adding in immature patients into the sample is an interesting choice.
+
+The IKDC is also not validated for paediatric patients. In their defence, the paediatric version of the IKDC would not be published for another decade [@nasreddine2016]. It is also contended that the Lysholm is not validated for paediatric populations [@fabricant2020]. <!--# What about the lysholm? -->
+
+```{r}
+SexCheck <- list(
+  Group1 = prop.test(Group1$FemaleCount, 90, 0.95),
+  NZRegistry = prop.test(8816,8816+11581,conf.level = 0.95)
+)
+```
+
+```{epoxy}
+
+The proportion of females {round(SexCheck$Group1$estimate)} ({round(SexCheck$Group$conf.int[1],digits = 2)}, {round(SexCheck$Group1$conf.int[2],digits = 2)}) is pretty much in line with the NZ ACL Registry {round(SexCheck$NZRegistry$estimate,digits = 3)} ({round(SexCheck$NZRegistry$conf.int[1],digits = 2)}, {round(SexCheck$NZRegistry$conf.int[2],digits = 2)})
+
+```
+
+Comparison between groups for age as reported
+
+```{r}
+
+SexCheck$GroupCom = prop.test(
+  x = c(42,43),
+  n = c(90,90),
+  conf.level = 0.95
+)
+
+```
+
+Now let's have a look at age.
+
+```{r}
+scrutiny::grim(as.character(Group1$AgeMedian), n = 90)
+```
+
+```{r}
+scrutiny::grim(as.character(Group2$AgeMedian), n = 90)
+```
+
+Do a comparison - we have to assume the median and the means are the same in this sample.
+
+```{r}
+
+AgeCheck <- list(
+  t_stat = (Group1$AgeMedian - Group2$AgeMedian) / sqrt((Group1$AgeSDEst^2 / 90) + (Group2$AgeSDEst^2 / 90)),
+  df = (90 + 90) - 2
+)
+
+AgeCheck$p_value <- 2 * pt(-abs(AgeCheck$t_stat), AgeCheck$df)
+
+```
+
+```{epoxy}
+
+Using a st
+
+```
+
+\
 
 ## CONSORT \[16\] Numbers Analysed
 
@@ -573,6 +752,8 @@ Not applicable
 ## CONSORT \[17a\] Outcomes and Estimation
 
 <!--# For each primary and secondary outcome, results for each group, and the estimated effect size and its precision (such as 95% confidence interval) -->
+
+<!--# For multidimensional PRO results from each domain and time point -->
 
 ## CONSORT \[17a2\] Outcomes Omitted
 
@@ -588,10 +769,22 @@ Not applicable
 
 ## CONSORT \[19\] Harms
 
+<!--# All important harms or unintended effects in each group (for specific guidance see CONSORT for harms) -->
+
 # Discussion
 
 ## CONSORT \[20\] Limitations
 
+<!--# Trial limitations, addressing sources of potential bias, imprecision, and, if relevant, multiplicity of analyses -->
+
+<!--# P20/21: PRO–specific limitations and implications for generalizability and clinical practice -->
+
 ## CONSORT \[21\] Generalisability
 
+<!--# Generalizability (external validity, applicability) of the trial findings -->
+
 ## CONSORT \[22\] Interpretation
+
+<!--# Interpretation consistent with results, balancing benefits and harms, and considering other relevant evidence -->
+
+<!--# PRO data should be interpreted in relation to clinical outcomes including survival data, where relevant -->
