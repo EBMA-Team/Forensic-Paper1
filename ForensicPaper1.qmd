@@ -27,6 +27,18 @@ This analysis acts as a training activity to apply techniques described in [Heat
 
 I will extend this approach, by encapsulating a review within the contemporary reporting guidelines for the trial reported in the paper in question.
 
+## My Conflicts Up Front
+
+-   I've consulted for Smith and Nephew (see below) for a small engagement \>3 years ago.
+
+-   I would call myself an acquaintance of the study authors
+
+    -   I have co-authored a paper with Justin Roe [@Oussedik2012].
+
+-   I have performed the same analyst role as the person responsible in this trial
+
+-   Am I jealous of the citation record of this article - absolutely not, my interest here is for us to be able to move the conversation forward into the contemporary period and better serve future patients.
+
 ## Preparation
 
 Load up required packages in advance. Citations applied to each library at first use in the text.
@@ -443,7 +455,7 @@ Changes to eligibility may have altered or been reinterpreted at some point afte
 Recreate eligibility for clarity
 
 | Category | Inclusion | Exclusion | Comments |
-|------------------|------------------|------------------|-------------------|
+|----|----|----|----|
 | Patient | Desire return to competitive activity |  |  |
 | Pathology | Complete ACL rupture | Additional ligament injury such that reconstruction was deemed necessary |  |
 |  | Grade 2 Lachman (or above) | Chondral damage |  |
@@ -484,7 +496,7 @@ Single-centre and single-surgeon study, eligibility criteria for centres and car
 <!--# Completely defined pre-specified primary and secondary outcome measures, including how and when they were assessed -->
 
 | Category | Outcome | Type | Comments |
-|------------------|-------------------|------------------|------------------|
+|----|----|----|----|
 | Adverse Events | **Ipsilateral graft intact** | Time to event |  |
 |  | Contralateral ligament intact | Binary; Time to event |  |
 |  | Ipsilateral adverse events (complications) | Binary |  |
@@ -594,7 +606,7 @@ There are a metric tonne of comparisons between groups in this paper. Let's see 
 Data assumption was non-parametric. <!--# Come back to this -->
 
 | Category | Outcome | Type | Model - Test | Comments |
-|-------------|----------------|-----------|--------------|--------------------|
+|----|----|----|----|----|
 | Adverse Events | **Ipsilateral graft intact** | Time to event | Nil (KM used to establish survival rates) | A risk table would have been helpful |
 |  | Contralateral ligament intact | Binary; Time to event | Nil (KM used to establish survival rates) | A risk table would have been helpful |
 |  | Ipsilateral adverse events (complications) | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
@@ -651,7 +663,7 @@ PT Group - Jan-1993 to Apr-1994
 
 HT Group - Oct-93 to Nov-1994
 
-The authors state "senior author...after Apr-1994..used the HT graft exclusively". Does this comparison not include the learning curve for HT? Why not recruit HT group after Apr-1994?
+The authors state "senior author...after Apr-1994..used the HT graft exclusively". Does this comparison not include the learning curve for HT? Why not start recruitment of HT group after Apr-1994?
 
 ## CONSORT \[14b\] Trial Termination
 
