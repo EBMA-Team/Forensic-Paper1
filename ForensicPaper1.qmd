@@ -47,7 +47,8 @@ Load up required packages in advance. Citations applied to each library at first
 
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(
-  "citationchaser",
+  "simstudy",
+  "statcheck",
   "PropCIs",
   "gert",
   "rcrossref",
@@ -99,6 +100,8 @@ pacman::p_load(
 ```
 
 ## Pull Retraction Watch
+
+Cloned the RW git repo to the environment to bounce off later.
 
 ```{r}
 
@@ -176,118 +179,159 @@ There were 0 comments for this paper on PubPeer \[ 15-Feb-2025\].
 
 ## The authors
 
-Retraction Watch
+So I wrote a function (with the help of an LLM) to work through the surnames and bounce them against the RW database. Rest assured, I have used the underlying commands before, this was just a quicker way to put them together. We can argue about validation of this step until the cows come home, but for now I'm fairly satisfied that the individual authors do not have any retractions.
 
-Function to retrieve potential retractions
+You can see for yourself in the matches table below (maybe I missed one?).
 
 ```{r}
 library(tidyverse)
 library(stringr)
 library(stringdist)
+library(memoise)
+library(parallel)
+library(furrr)
+library(progressr)
+
+# Set up parallel processing
+setup_parallel <- function(cores = NULL) {
+  if (is.null(cores)) {
+    cores <- parallel::detectCores() - 1
+  }
+  plan(multisession, workers = cores)
+}
+
+# Create memoized helper functions
+mem_stringdist <- memoise(stringdist)
+mem_str_detect <- memoise(str_detect)
 
 search_retractions_by_authors <- function(author_names, 
                                         retraction_data, 
                                         fuzzy_threshold = 0.2,
                                         date_from = NULL,
-                                        date_to = NULL) {
+                                        date_to = NULL,
+                                        cores = NULL) {
   
-  # Convert author names to lowercase for case-insensitive matching
-  author_names_lower <- tolower(author_names)
+  # Initialize parallel processing
+  setup_parallel(cores)
   
-  # Process retraction data
-  matching_retractions <- retraction_data %>%
-    # Convert dates to proper format
-    mutate(
-      RetractionDate = as.Date(RetractionDate, format = "%m/%d/%Y"),
-      OriginalPaperDate = as.Date(OriginalPaperDate, format = "%m/%d/%Y")
-    ) %>%
-    # Apply date filters if provided
-    {if (!is.null(date_from)) filter(., RetractionDate >= as.Date(date_from)) else .} %>%
-    {if (!is.null(date_to)) filter(., RetractionDate <= as.Date(date_to)) else .} %>%
-    # Convert Author column to lowercase for matching
-    mutate(authors_lower = tolower(Author))
-  
-  # Function to find exact matches
-  find_exact_matches <- function(author_string, search_names) {
-    matches <- search_names[sapply(search_names, function(name) {
-      str_detect(author_string, str_c("\\b", name, "\\b"))
-    })]
-    str_c(matches, collapse = "; ")
-  }
-  
-  # Function to find fuzzy matches
-  find_fuzzy_matches <- function(author_string, search_names, threshold) {
-    # Split author string into individual names
-    individual_authors <- str_split(author_string, ";")[[1]] %>%
-      str_trim()
+  # Progress function wrapped in with_progress
+  with_progress({
+    p <- progressor(steps = 4)
     
-    # Check each search name against each individual author
-    matches <- search_names[sapply(search_names, function(search_name) {
-      min_dist <- min(stringdist(individual_authors, search_name, method = "jw"))
-      min_dist <= threshold
-    })]
+    # Convert author names to lowercase for case-insensitive matching
+    author_names_lower <- tolower(author_names)
+    p(amount = 1, message = "Initializing...")
     
-    str_c(unique(matches), collapse = "; ")
-  }
-  
-  # Perform matching and create results
-  results <- matching_retractions %>%
-    # Find exact matches
-    mutate(
-      exact_matches = map_chr(authors_lower, ~find_exact_matches(., author_names_lower))
-    ) %>%
-    # Find fuzzy matches
-    mutate(
-      fuzzy_matches = map_chr(authors_lower, ~find_fuzzy_matches(., author_names_lower, fuzzy_threshold))
-    ) %>%
-    # Keep rows with either exact or fuzzy matches
-    filter(exact_matches != "" | fuzzy_matches != "") %>%
-    # Select and arrange columns
-    select(
-      Title,
-      Author,
-      exact_matches,
-      fuzzy_matches,
-      Journal,
-      Publisher,
-      Country,
-      RetractionDate,
-      OriginalPaperDate,
-      RetractionDOI,
-      OriginalPaperDOI,
-      Reason,
-      everything(),
-      -authors_lower
+    # Process retraction data
+    matching_retractions <- retraction_data %>%
+      # Convert dates to proper format
+      mutate(
+        RetractionDate = as.Date(RetractionDate, format = "%m/%d/%Y"),
+        OriginalPaperDate = as.Date(OriginalPaperDate, format = "%m/%d/%Y")
+      ) %>%
+      # Apply date filters if provided
+      {if (!is.null(date_from)) filter(., RetractionDate >= as.Date(date_from)) else .} %>%
+      {if (!is.null(date_to)) filter(., RetractionDate <= as.Date(date_to)) else .} %>%
+      # Convert Author column to lowercase for matching
+      mutate(authors_lower = tolower(Author))
+    
+    p(amount = 1, message = "Processing data...")
+    
+    # Perform exact matching
+    matching_retractions <- matching_retractions %>%
+      mutate(
+        exact_matches = future_map_chr(
+          authors_lower,
+          function(author_string) {
+            matches <- author_names_lower[sapply(author_names_lower, function(name) {
+              str_detect(author_string, str_c("\\b", name, "\\b"))
+            })]
+            str_c(matches, collapse = "; ")
+          },
+          .progress = TRUE
+        )
+      )
+    
+    p(amount = 1, message = "Performing exact matching...")
+    
+    # Perform fuzzy matching
+    matching_retractions <- matching_retractions %>%
+      mutate(
+        fuzzy_matches = future_map_chr(
+          authors_lower,
+          function(author_string) {
+            individual_authors <- str_split(author_string, ";")[[1]] %>%
+              str_trim()
+            
+            matches <- author_names_lower[sapply(author_names_lower, function(search_name) {
+              min_dist <- min(sapply(individual_authors, function(x) 
+                stringdist(x, search_name, method = "jw")))
+              min_dist <= fuzzy_threshold
+            })]
+            
+            str_c(unique(matches), collapse = "; ")
+          },
+          .progress = TRUE
+        )
+      )
+    
+    p(amount = 1, message = "Performing fuzzy matching...")
+    
+    # Filter and select columns
+    results <- matching_retractions %>%
+      filter(exact_matches != "" | fuzzy_matches != "") %>%
+      select(
+        Title,
+        Author,
+        exact_matches,
+        fuzzy_matches,
+        Journal,
+        Publisher,
+        Country,
+        RetractionDate,
+        OriginalPaperDate,
+        RetractionDOI,
+        OriginalPaperDOI,
+        Reason,
+        everything(),
+        -authors_lower
+      )
+    
+    # Generate summary statistics
+    summary_stats <- list(
+      total_matches = nrow(results),
+      matches_by_year = results %>%
+        mutate(year = format(RetractionDate, "%Y")) %>%
+        count(year, name = "retractions") %>%
+        arrange(desc(year)),
+      matches_by_publisher = results %>%
+        count(Publisher, sort = TRUE, name = "retractions"),
+      matches_by_country = results %>%
+        count(Country, sort = TRUE, name = "retractions"),
+      exact_vs_fuzzy = c(
+        exact = sum(results$exact_matches != ""),
+        fuzzy_only = sum(results$exact_matches == "" & results$fuzzy_matches != "")
+      ),
+      date_range = c(
+        min = min(results$RetractionDate, na.rm = TRUE),
+        max = max(results$RetractionDate, na.rm = TRUE)
+      )
     )
-  
-  # Generate summary statistics
-  summary_stats <- list(
-    total_matches = nrow(results),
-    matches_by_year = results %>%
-      mutate(year = format(RetractionDate, "%Y")) %>%
-      count(year, name = "retractions") %>%
-      arrange(desc(year)),
-    matches_by_publisher = results %>%
-      count(Publisher, sort = TRUE, name = "retractions"),
-    matches_by_country = results %>%
-      count(Country, sort = TRUE, name = "retractions"),
-    exact_vs_fuzzy = c(
-      exact = sum(results$exact_matches != ""),
-      fuzzy_only = sum(results$exact_matches == "" & results$fuzzy_matches != "")
-    ),
-    date_range = c(
-      min = min(results$RetractionDate, na.rm = TRUE),
-      max = max(results$RetractionDate, na.rm = TRUE)
+    
+    # Return results within with_progress
+    list(
+      matches = results,
+      summary = summary_stats
     )
-  )
-  
-  # Return both results and summary statistics
-  return(list(
-    matches = results,
-    summary = summary_stats
-  ))
+  })
 }
 
+# Clear memoization cache function
+clear_retraction_search_cache <- function() {
+  forget(mem_stringdist)
+  forget(mem_str_detect)
+  gc()  # Run garbage collection
+}
 
 
 ```
@@ -304,25 +348,83 @@ author_full_names <- TargetCitation$data$author[[1]] %>%
 ```
 
 ```{r}
-# Example usage:
-RWAuthors <- search_retractions_by_authors(
-  author_surnames,
-  Retractions,
-  fuzzy_threshold = 0.9,
-  date_from = "2004-01-01",
-  date_to = "2024-12-31"
-)
 
-# # View matches
-View(RWAuthors$matches)
-# 
-# # View summary statistics
-print(RWAuthors$summary)
+# For console progress bar
+handlers("progress")
+
+# Or for more detailed progress messages
+handlers("txtprogressbar")
+
+# Run the search with progress reporting
+with_progress({
+  results <- search_retractions_by_authors(
+    author_surnames,
+    Retractions,
+    fuzzy_threshold = 0.2,
+    date_from = "2020-01-01",
+    date_to = "2024-12-31"
+  )
+})
+```
+
+```{r}
+
+
+library(gt)
+
+AuthorMatches <- results$matches
+
+gt::gt(AuthorMatches |> dplyr::select(
+  Title,
+  Author,
+  Journal,
+  Country,
+  exact_matches,
+  fuzzy_matches,
+  RetractionDate
+)) |>
+  tab_options(
+    table.width = px(1200),  # Wider overall table
+    table.font.size = px(12)  # Slightly smaller font
+  ) |>
+  cols_width(
+    Title ~ px(200),          # Wider for full titles
+    Author ~ px(200),         # Space for multiple authors
+    Journal ~ px(200),        # Space for journal names
+    Country ~ px(150),        # Space for multiple countries
+    exact_matches ~ px(75),     # Wide space for institutions
+    fuzzy_matches ~ px(75),     # Wide space for institutions
+    RetractionDate ~ px(75)     # Wide space for institutions
+  ) |>
+  fmt_markdown(columns = everything()) |>
+  text_transform(
+    locations = cells_body(),
+    fn = function(x) {
+      vapply(x, function(x) {
+        if (is.character(x)) {
+          # Insert line breaks in long strings
+          gsub("([,;]) ", "\\1\n", x)
+        } else {
+          as.character(x)
+        }
+      }, character(1))
+    }
+  ) |>
+  tab_style(
+    style = cell_text(whitespace = "pre-wrap"),  # Preserve line breaks
+    locations = cells_body()
+  ) |>
+  cols_align(
+    align = "left",
+    columns = everything()
+  ) |>
+  knitr::knit_print()
+
 ```
 
 # Reporting Framework
 
-To provide some structure to the following scrutiny of this article - the following guidelines were utilised.
+To provide some structure to scrutinising this article - the following guidelines were utilised.
 
 CONSORT 2010 - [@moher2010]
 
@@ -338,11 +440,11 @@ CONSORT Harms - [@junqueira2023]
 
 # Trial Information
 
-So first things first, this study is not a randomised trial. In the methods, it's described as a "prospective controlled trial".
+So first things first, this study is not a randomised trial. In the methods, it's described as a "prospective controlled trial". More on that later.
 
 ## CONSORT \[23\] Registration
 
-No prior trial registration in clinicaltrials.gov.
+No prior trial registration in clinicaltrials.gov. Manual search 17-Feb-2025.
 
 ## CONSORT \[24\] Trial Protocol
 
@@ -456,7 +558,7 @@ Changes to eligibility may have altered or been reinterpreted at some point afte
 Recreate eligibility for clarity
 
 | Category | Inclusion | Exclusion | Comments |
-|----|----|----|----|
+|------------------|------------------|------------------|------------------|
 | Patient | Desire return to competitive activity |  |  |
 | Pathology | Complete ACL rupture | Additional ligament injury such that reconstruction was deemed necessary |  |
 |  | Grade 2 Lachman (or above) | Chondral damage |  |
@@ -497,7 +599,7 @@ Single-centre and single-surgeon study, eligibility criteria for centres and car
 <!--# Completely defined pre-specified primary and secondary outcome measures, including how and when they were assessed -->
 
 | Category | Outcome | Type | Comments |
-|----|----|----|----|
+|------------------|------------------|------------------|------------------|
 | Adverse Events | **Ipsilateral graft intact** | Time to event |  |
 |  | Contralateral ligament intact | Binary; Time to event |  |
 |  | Ipsilateral adverse events (complications) | Binary |  |
@@ -568,6 +670,8 @@ Patient selection - exclusivity (patients were self-selected based on perioperat
 
 <!--# If done, who was blinded after assignment to interventions (for example, participants, care providers, those assessing outcomes) and how -->
 
+There is no mention of blinding in any of the articles related to this trial. Even if randomisation didnt occur, blinding of everyone involved in the trial (as much as practicable), but particularly those responsible for measurement and analysis is crucial to mitigate potential biases. Especially when industry funding is in the mix.
+
 ## CONSORT \[11b\] Intervention Similarity
 
 Not applicable
@@ -598,6 +702,16 @@ So close, yet so far - linear regression gets a guernsey, but not to do with any
 
 While this is good to know, there are lots of other details we need before we get to this.
 
+## Scrutiny
+
+Let's try out some checks -see how far we get. Let's use *statcheck* first, see if we can get a bite.
+
+```{r}
+statcheck::checkPDF("~/Pinczewski et al 2007.pdf")
+```
+
+Not super great, but not surprising either - the results are not formatted in APA style (not unusual for the field).
+
 ## CONSORT \[12a\] Comparison Between Groups
 
 <!--# P12a: Statistical approaches for dealing with missing data are explicitly stated -->
@@ -607,7 +721,7 @@ There are a metric tonne of comparisons between groups in this paper. Let's see 
 Data assumption was non-parametric. <!--# Come back to this -->
 
 | Category | Outcome | Type | Model - Test | Comments |
-|----|----|----|----|----|
+|---------------|---------------|---------------|---------------|---------------|
 | Adverse Events | **Ipsilateral graft intact** | Time to event | Nil (KM used to establish survival rates) | A risk table would have been helpful |
 |  | Contralateral ligament intact | Binary; Time to event | Nil (KM used to establish survival rates) | A risk table would have been helpful |
 |  | Ipsilateral adverse events (complications) | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
@@ -627,6 +741,82 @@ Data assumption was non-parametric. <!--# Come back to this -->
 |  | Meniscal Treatment | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
 | Radiographic | IKDC grading x-ray | Ordinal | Between-Group: Mann-Whitney U Test |  |
 | Composite | IDEAL outcome | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
+
+Let's see if we can replicate the p-values. First let's simulate the groups
+
+```{r}
+# Generate datatable with 2 groups of 90
+StudySim <- simstudy::genData(149)
+
+# Assign group labels
+StudySim1 <- trtAssign(
+  StudySim,
+  nTrt = 2, 
+  balanced = FALSE,
+  ratio = 74:75,
+  grpName = "GraftGrp"
+)
+
+#Insert Outcome variables
+
+# # Define a binary variable with different probabilities for each group
+StudySimDef <- defDataAdd(
+   varname = "IdealOutcome",
+   formula = "ifelse(GraftGrp == 1, 0.47, 0.69)",# Prob 0.47 for group 1, 0.69 for group 2
+dist = "binary"
+   )
+
+# Add the new variable to the dataset
+ StudySim1 <- addColumns(def, StudySim1)
+
+
+```
+
+
+Let's switch the Group Assignment to a factor and run a Mann-Whitney U test on the outcome
+
+```{r}
+
+StudySim2 <- StudySim1 |> dplyr::mutate(
+  GraftGrp = forcats::as_factor(
+    GraftGrp
+  ),
+  IdealOutcome2 = forcats::as_factor(
+    IdealOutcome
+)
+)
+
+```
+
+Run the test
+
+```{r}
+
+stats::wilcox.test(
+  IdealOutcome ~ GraftGrp, 
+  data = StudySim2,
+  correct = TRUE,
+  exact = TRUE
+  )
+
+```
+The larger p-value in the paper is likely because the sample sizes were smaller, indicating that the number of cases with IKDC available was smaller than the reported followup rate.
+
+Let's rerun with the outcome as a categorical and apply an exact test instead.
+
+```{r}
+
+CountTable <- table(StudySim2$GraftGrp, StudySim2$IdealOutcome2)
+
+fisher.test(
+CountTable
+
+)
+
+```
+
+
+
 
 ## CONSORT \[12b\] Additional Analyses
 
@@ -666,6 +856,8 @@ HT Group - Oct-93 to Nov-1994
 
 The authors state "senior author...after Apr-1994..used the HT graft exclusively". Does this comparison not include the learning curve for HT? Why not start recruitment of HT group after Apr-1994?
 
+The specific followup dates are not included in any of the trial papers - this is particularly important for interpreting the PROMs.
+
 ## CONSORT \[14b\] Trial Termination
 
 <!--# Why the trial ended or was stopped -->
@@ -698,9 +890,9 @@ Group2$AgeSDEst = (Group2$AgeMax-Group2$AgeMin)/2
 
 ```
 
-Well, first of all - I'm not sure this would pass HREC in this day and age. ACL reconstruction in skeletally immature individuals is quite the different set of ethical considerations to adults and I'm not sure that would pass muster in the present environment. Considering the narrowness of the inclusion critera, adding in immature patients into the sample is an interesting choice.
+Well, first of all - I'm not sure this would pass HREC in this day and age. ACL reconstruction in skeletally immature individuals is a different set of ethical considerations to adults and I'm not sure that would pass muster in the present environment. Considering the narrowness of the inclusion critera, adding in immature patients into the sample is an interesting choice.
 
-The IKDC is also not validated for paediatric patients. In their defence, the paediatric version of the IKDC would not be published for another decade [@nasreddine2016]. It is also contended that the Lysholm is not validated for paediatric populations [@fabricant2020]. <!--# What about the lysholm? -->
+The IKDC is also not validated for paediatric patients. In their defence, the paediatric version of the IKDC would not be published for another decade [@nasreddine2016]. It is also contended that the Lysholm is not validated for paediatric populations [@fabricant2020].
 
 ```{r}
 SexCheck <- list(
