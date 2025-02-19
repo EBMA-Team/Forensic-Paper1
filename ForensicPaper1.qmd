@@ -456,7 +456,7 @@ Changes to eligibility may have altered or been reinterpreted at some point afte
 Recreate eligibility for clarity
 
 | Category | Inclusion | Exclusion | Comments |
-|------------------|------------------|------------------|------------------|
+|----|----|----|----|
 | Patient | Desire return to competitive activity |  |  |
 | Pathology | Complete ACL rupture | Additional ligament injury such that reconstruction was deemed necessary |  |
 |  | Grade 2 Lachman (or above) | Chondral damage |  |
@@ -497,7 +497,7 @@ Single-centre and single-surgeon study, eligibility criteria for centres and car
 <!--# Completely defined pre-specified primary and secondary outcome measures, including how and when they were assessed -->
 
 | Category | Outcome | Type | Comments |
-|------------------|------------------|------------------|------------------|
+|----|----|----|----|
 | Adverse Events | **Ipsilateral graft intact** | Time to event |  |
 |  | Contralateral ligament intact | Binary; Time to event |  |
 |  | Ipsilateral adverse events (complications) | Binary |  |
@@ -607,7 +607,7 @@ There are a metric tonne of comparisons between groups in this paper. Let's see 
 Data assumption was non-parametric. <!--# Come back to this -->
 
 | Category | Outcome | Type | Model - Test | Comments |
-|---------------|---------------|---------------|---------------|---------------|
+|----|----|----|----|----|
 | Adverse Events | **Ipsilateral graft intact** | Time to event | Nil (KM used to establish survival rates) | A risk table would have been helpful |
 |  | Contralateral ligament intact | Binary; Time to event | Nil (KM used to establish survival rates) | A risk table would have been helpful |
 |  | Ipsilateral adverse events (complications) | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
