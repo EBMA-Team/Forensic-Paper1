@@ -47,9 +47,10 @@ Load up required packages in advance. Citations applied to each library at first
 
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(
+  "pwr",
+  "confintr",
   "simstudy",
   "statcheck",
-  "PropCIs",
   "gert",
   "rcrossref",
   "httr",
@@ -138,11 +139,11 @@ targetDOI = "10.1177/0363546506296042"
 
 ```{epoxy}
 
-Full citation is - {rcrossref::cr_cn(dois = targetDOI, format = "text", style = "apa")}
+Full citation - {rcrossref::cr_cn(dois = targetDOI, format = "text", style = "apa")}
 
 ```
 
-# Selection Rationale
+## Selection Rationale
 
 The selected paper appears at number 2 in "The top 100 most cited articles in Australian orthopaedic surgery" [@mcmillan2024].
 
@@ -179,7 +180,7 @@ There were 0 comments for this paper on PubPeer \[ 15-Feb-2025\].
 
 ## The authors
 
-So I wrote a function (with the help of an LLM) to work through the surnames and bounce them against the RW database. Rest assured, I have used the underlying commands before, this was just a quicker way to put them together. We can argue about validation of this step until the cows come home, but for now I'm fairly satisfied that the individual authors do not have any retractions.
+So I wrote a function to work through the surnames and bounce them against the RW database. We can argue about validation of this step until the cows come home, but for now I'm fairly satisfied that the individual authors do not have any retractions.
 
 You can see for yourself in the matches table below (maybe I missed one?).
 
@@ -626,7 +627,14 @@ Ultimately, I can run some simulations here to prove the point, but I just dont 
 
 ## CONSORT \[7a\] Determination
 
-Not described.
+Not described in the paper.
+
+```{r}
+pwr.p.test(h = ES.h(p1 = 0.75, p2 = 0.50),
+           sig.level = 0.05,
+           power = 0.80,
+           alternative = "greater")
+```
 
 ## CONSORT \[7b\] Interim Analyses and Stopping
 
@@ -702,16 +710,6 @@ So close, yet so far - linear regression gets a guernsey, but not to do with any
 
 While this is good to know, there are lots of other details we need before we get to this.
 
-## Scrutiny
-
-Let's try out some checks -see how far we get. Let's use *statcheck* first, see if we can get a bite.
-
-```{r}
-statcheck::checkPDF("~/Pinczewski et al 2007.pdf")
-```
-
-Not super great, but not surprising either - the results are not formatted in APA style (not unusual for the field).
-
 ## CONSORT \[12a\] Comparison Between Groups
 
 <!--# P12a: Statistical approaches for dealing with missing data are explicitly stated -->
@@ -741,82 +739,6 @@ Data assumption was non-parametric. <!--# Come back to this -->
 |  | Meniscal Treatment | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
 | Radiographic | IKDC grading x-ray | Ordinal | Between-Group: Mann-Whitney U Test |  |
 | Composite | IDEAL outcome | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
-
-Let's see if we can replicate the p-values. First let's simulate the groups
-
-```{r}
-# Generate datatable with 2 groups of 90
-StudySim <- simstudy::genData(149)
-
-# Assign group labels
-StudySim1 <- trtAssign(
-  StudySim,
-  nTrt = 2, 
-  balanced = FALSE,
-  ratio = 74:75,
-  grpName = "GraftGrp"
-)
-
-#Insert Outcome variables
-
-# # Define a binary variable with different probabilities for each group
-StudySimDef <- defDataAdd(
-   varname = "IdealOutcome",
-   formula = "ifelse(GraftGrp == 1, 0.47, 0.69)",# Prob 0.47 for group 1, 0.69 for group 2
-dist = "binary"
-   )
-
-# Add the new variable to the dataset
- StudySim1 <- addColumns(def, StudySim1)
-
-
-```
-
-
-Let's switch the Group Assignment to a factor and run a Mann-Whitney U test on the outcome
-
-```{r}
-
-StudySim2 <- StudySim1 |> dplyr::mutate(
-  GraftGrp = forcats::as_factor(
-    GraftGrp
-  ),
-  IdealOutcome2 = forcats::as_factor(
-    IdealOutcome
-)
-)
-
-```
-
-Run the test
-
-```{r}
-
-stats::wilcox.test(
-  IdealOutcome ~ GraftGrp, 
-  data = StudySim2,
-  correct = TRUE,
-  exact = TRUE
-  )
-
-```
-The larger p-value in the paper is likely because the sample sizes were smaller, indicating that the number of cases with IKDC available was smaller than the reported followup rate.
-
-Let's rerun with the outcome as a categorical and apply an exact test instead.
-
-```{r}
-
-CountTable <- table(StudySim2$GraftGrp, StudySim2$IdealOutcome2)
-
-fisher.test(
-CountTable
-
-)
-
-```
-
-
-
 
 ## CONSORT \[12b\] Additional Analyses
 
@@ -960,7 +882,119 @@ Using a st
 
 <!--# For multidimensional PRO results from each domain and time point -->
 
-## CONSORT \[17a2\] Outcomes Omitted
+## Scrutiny
+
+Let's try out some checks -see how far we get. Let's use *statcheck* first, see if we can get a bite.
+
+```{r}
+statcheck::checkPDF("~/Pinczewski et al 2007.pdf")
+```
+
+Not super great, but not surprising either - the results are not formatted in APA style (not unusual for the field).
+
+Next, let's see if we can replicate a selection of the p-values. Let's simulate the groups.
+
+```{r, warning= FALSE}
+# Function to generate one dataset and run test
+simulate_test <- function(seed) {
+  set.seed(seed)
+  
+  # Generate data
+  study_data <- simstudy::genData(149) |>
+    simstudy::trtAssign(
+      nTrt = 2,
+      balanced = FALSE,
+      ratio = 74:75,
+      grpName = "GraftGrp"
+    )
+  
+  # Define and add outcome
+  study_def <- simstudy::defDataAdd(
+    varname = "IdealOutcome",
+    formula = "ifelse(GraftGrp == 1, 0.47, 0.69)",
+    dist = "binary"
+  )
+  
+  final_data <- simstudy::addColumns(study_def, study_data) |>
+    dplyr::mutate(
+      GraftGrp = forcats::as_factor(GraftGrp),
+      IdealOutcome = as.numeric(IdealOutcome)
+    )
+  
+  # Run test and extract statistics
+  test_result <- stats::wilcox.test(
+    IdealOutcome ~ GraftGrp,
+    data = final_data,
+    correct = TRUE,
+    exact = TRUE
+  )
+  
+  # Calculate effect size (difference in proportions)
+  group_props <- tapply(final_data$IdealOutcome, final_data$GraftGrp, mean)
+  effect_size <- diff(group_props)
+  
+  return(list(
+    p_value = test_result$p.value,
+    effect_size = effect_size
+  ))
+}
+
+# Run bootstrap simulation
+set.seed(2065) # For reproducibility of the simulation
+n_iterations <- 1000
+results <- data.frame(
+  p_value = numeric(n_iterations),
+  effect_size = numeric(n_iterations)
+)
+
+for(i in 1:n_iterations) {
+  sim_result <- simulate_test(seed = i)
+  results$p_value[i] <- sim_result$p_value
+  results$effect_size[i] <- sim_result$effect_size
+}
+
+# Calculate summary statistics
+summary_stats <- list(
+  mean_pvalue = mean(results$p_value),
+  p_value_95ci = confintr::ci_mean(results$p_value),
+  mean_effect = mean(results$effect_size),
+  effect_95ci = confintr::ci_mean(results$effect_size),
+  sig_results = (nrow(results |> dplyr::filter(p_value < 0.05))/1000) * 100
+)
+
+# Print results
+print("Bootstrap Simulation Results:")
+print(paste("Mean p-value:", round(summary_stats$mean_pvalue, 4)))
+print(paste("95% CI for p-value:", 
+            round(summary_stats$p_value_95ci$interval, 4)))
+print(paste("Mean effect size (difference in proportions):", round(summary_stats$mean_effect, 4)))
+print(paste("95% CI for effect size:",
+            round(summary_stats$effect_95ci$interval, 4)))
+print(paste("Percentage of significant results:", 
+            round(summary_stats$sig_results, 1), "%"))
+
+# Create histogram of effect sizes
+if (requireNamespace("ggplot2", quietly = TRUE)) {
+  ggplot2::ggplot(results, ggplot2::aes(x = effect_size)) +
+    ggplot2::geom_histogram(bins = 30, fill = "skyblue", color = "black") +
+    ggplot2::theme_minimal() +
+    ggplot2::labs(
+      title = "Distribution of Effect Sizes Across Simulations",
+      x = "Effect Size (Difference in Proportions)",
+      y = "Count"
+    )
+}
+```
+
+```{r}
+p.out <- pwr.2p.test(h = ES.h(p1 = 0.47, p2 = 0.69),
+                    sig.level = 0.05,
+                    power = 0.80,
+                    alternative = "two.sided")
+plot(p.out)
+```
+
+CONSORT \[17a2\] Outcomes Omitted
 
 <!--# For outcomes omitted from the trial report (benefits and harms), provide rationale for not reporting and indicate where the data on omitted outcomes can be accessed -->
 
@@ -993,3 +1027,5 @@ Using a st
 <!--# Interpretation consistent with results, balancing benefits and harms, and considering other relevant evidence -->
 
 <!--# PRO data should be interpreted in relation to clinical outcomes including survival data, where relevant -->
+
+# References
