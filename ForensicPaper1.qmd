@@ -47,7 +47,8 @@ Load up required packages in advance. Citations applied to each library at first
 
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(
-  "pwr",
+  "wmwpow",
+  "pwrss",
   "confintr",
   "simstudy",
   "statcheck",
@@ -636,6 +637,22 @@ pwr.p.test(h = ES.h(p1 = 0.75, p2 = 0.50),
            alternative = "greater")
 ```
 
+```{r}
+
+pwrss.z.2props(
+  p1 = 0.69, 
+  p2 = 0.47,
+  arcsin.trans = FALSE, 
+  kappa = 1, 
+  alpha = 0.05,
+  alternative = "not equal",
+  n2 = 74, 
+  power = NULL, 
+  verbose = TRUE
+  )
+
+```
+
 ## CONSORT \[7b\] Interim Analyses and Stopping
 
 The series of papers making up reporting of this trial really needed a more comprehensive approach to stopping parameters and planning for interim analyses, at what turned out to be 5, 7 and 10 year follow ups.
@@ -986,13 +1003,7 @@ if (requireNamespace("ggplot2", quietly = TRUE)) {
 }
 ```
 
-```{r}
-p.out <- pwr.2p.test(h = ES.h(p1 = 0.47, p2 = 0.69),
-                    sig.level = 0.05,
-                    power = 0.80,
-                    alternative = "two.sided")
-plot(p.out)
-```
+
 
 CONSORT \[17a2\] Outcomes Omitted
 
