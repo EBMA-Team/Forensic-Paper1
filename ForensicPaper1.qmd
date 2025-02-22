@@ -1288,6 +1288,24 @@ if (requireNamespace("ggplot2", quietly = TRUE)) {
 ```
 
 
+We'll check the percentages next
+
+
+```{r}
+jpap_3 <- tibble::tribble(
+  ~x,     ~n,
+  "32.5",  438,
+  "35.6",  455,
+  "21.7",  501,
+  "39.3",  516,
+)
+```
+
+
+
+
+
+
 Survival analysis - confounding by contralateral rupture (more ruptures, less chance of ipsilateral rupture)
 
 
