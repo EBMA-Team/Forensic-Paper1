@@ -29,7 +29,9 @@ I will extend this approach, by encapsulating a review within the contemporary r
 
 ## My Conflicts Up Front
 
--   I've consulted for Smith and Nephew (see below) for a small engagement \>3 years ago.
+-   I am a shareholder in [EBM Analytics](www.ebmanalytics.com.au).
+
+    -   I declare an institutional engagement with Smith and Nephew (see below) for a small project \>3 years ago.
 
 -   I would call myself an acquaintance of the study authors
 
@@ -47,6 +49,8 @@ Load up required packages in advance. Citations applied to each library at first
 
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(
+  "simsurv",
+  "powerSurvEpi",
   "wmwpow",
   "pwrss",
   "confintr",
@@ -631,13 +635,6 @@ Ultimately, I can run some simulations here to prove the point, but I just dont 
 Not described in the paper.
 
 ```{r}
-pwr.p.test(h = ES.h(p1 = 0.75, p2 = 0.50),
-           sig.level = 0.05,
-           power = 0.80,
-           alternative = "greater")
-```
-
-```{r}
 
 pwrss.z.2props(
   p1 = 0.69, 
@@ -651,6 +648,289 @@ pwrss.z.2props(
   verbose = TRUE
   )
 
+```
+
+We'll turn our attention to the time to event analysis of graft rupture.
+
+First - simulate a time to event dataset based on the reported findings.
+
+The 10 year survival was 86 (95%CI 79 - 94) for the HT group and 92 (95%CI 86 - 98) for the PT group
+
+```{epoxy}
+
+
+
+The 10 year survival was 86% (95%CI 79 - 94) for the HT group and 92% (95%CI 86 - 98) for the PT group. This produces a hazard ratio of {round(92/86, 2)}.
+
+```
+
+We can reproduce the survival
+
+```{r}
+
+# Load required packages
+library(simsurv)
+library(survival)
+library(ggsurvfit)
+library(tidyverse)
+
+# Set seed for reproducibility
+set.seed(123)
+
+# Functions remain the same
+calc_surv_prob <- function(data, time_point) {
+  fit <- survival::survfit(
+    survival::Surv(eventtime, status) ~ trt, 
+    data = data
+  )
+  summary(fit, times = time_point)$surv
+}
+
+calc_ci <- function(data, time_point) {
+  fit <- survival::survfit(
+    survival::Surv(eventtime, status) ~ trt, 
+    data = data
+  )
+  summ <- summary(fit, times = time_point)
+  list(
+    lower = summ$lower,
+    upper = summ$upper
+  )
+}
+
+calc_hr <- function(data) {
+  cox_fit <- survival::coxph(
+    survival::Surv(eventtime, status) ~ trt, 
+    data = data
+  )
+  exp(stats::coef(cox_fit))
+}
+
+# Set up simulation parameters
+n <- 180
+covs <- base::data.frame(
+  id = base::seq(1, n),
+  trt = base::rep(c(0, 1), each = n/2)  # 0 = PT group (reference), 1 = HT group
+)
+
+# Calculate required lambda for PT group (target survival = 0.92 at 10 years)
+# Using the Weibull survival function: S(t) = exp(-λt^γ)
+# For PT group: 0.92 = exp(-λ * 10^γ)
+gamma_val <- 1.1  # Shape parameter
+# Solving for lambda: λ = -ln(0.92)/(10^γ)
+lambda_baseline <- -log(0.92)/(10^gamma_val)
+lambda_ht <- lambda_baseline * 1.07
+
+# Adjusted parameters
+params <- base::list(
+  lambdas = lambda_baseline,
+  gammas = gamma_val,
+  # For HT group target of 0.86, we need HR = 1.07
+  betas = c(trt = log(1.07)),  # HT group has 1.07 times the hazard
+  x = covs,
+  maxt = 10
+)
+
+# Run simulation
+sim_data <- base::do.call(simsurv::simsurv, params)
+sim_data <- base::merge(sim_data, covs)
+
+# Calculate metrics
+surv_probs <- calc_surv_prob(sim_data, 10)
+ci_bounds <- calc_ci(sim_data, 10)
+hr <- calc_hr(sim_data)
+
+# Print results
+base::cat("PT Group (trt=0) 10-year survival:", base::round(surv_probs[1] * 100, 1), "%\n")
+base::cat("PT Group 95% CI:", base::round(ci_bounds$lower[1] * 100, 1), "-", 
+    base::round(ci_bounds$upper[1] * 100, 1), "%\n")
+base::cat("HT Group (trt=1) 10-year survival:", base::round(surv_probs[2] * 100, 1), "%\n")
+base::cat("HT Group 95% CI:", base::round(ci_bounds$lower[2] * 100, 1), "-", 
+    base::round(ci_bounds$upper[2] * 100, 1), "%\n")
+base::cat("Hazard Ratio:", base::round(hr, 2), "\n")
+
+# Create survival plot
+survfit_object <- survival::survfit(
+  survival::Surv(eventtime, status) ~ trt,
+  data = sim_data
+)
+
+# Create the plot using ggsurvfit
+survival_plot <- ggsurvfit::ggsurvfit(survfit_object) +
+  ggsurvfit::add_confidence_interval() +
+  ggsurvfit::add_risktable(
+    times = c(2,5,7,10),
+    risktable_stats = c("n.risk", "cum.event"),
+  ) +
+  ggplot2::scale_color_manual(
+    values = c("#2E9FDF", "#E7B800"),
+    labels = c("PT Group", "HT Group"),
+    name = "Treatment"
+  ) +
+  ggplot2::scale_fill_manual(
+    values = c("#2E9FDF33", "#E7B80033"),
+    labels = c("PT Group", "HT Group"),
+    name = "Treatment"
+  ) +
+  ggplot2::labs(
+    title = "Simulated Survival Curves by Treatment Group",
+    x = "Time (years)",
+    y = "Survival probability"
+  ) +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(
+    legend.position = "bottom",
+    plot.title = ggplot2::element_text(hjust = 0.5)
+  )
+
+# Display the plot
+print(survival_plot)
+
+```
+
+```{r}
+
+set.seed(2065)
+
+# Function to generate survival times for a group based on specified failure patterns
+generate_group_data <- function(n_subjects, failures_by_period, periods) {
+  # Initialize all subjects as censored at 10 years
+  data <- data.frame(
+    time = rep(10, n_subjects),
+    status = rep(0, n_subjects)
+  )
+  
+  # Total failures to distribute
+  n_failures <- sum(failures_by_period)
+  
+  # Randomly select subjects who will fail
+  fail_indices <- sample(1:n_subjects, n_failures)
+  
+  # Current position in fail_indices
+  current_pos <- 1
+  
+  # Distribute failures across time periods
+  for(i in 1:length(failures_by_period)) {
+    if(failures_by_period[i] > 0) {
+      # Get indices for this period's failures
+      period_indices <- fail_indices[current_pos:(current_pos + failures_by_period[i] - 1)]
+      
+      # Generate random times within this period
+      period_start <- if(i == 1) 0 else periods[i-1]
+      period_end <- periods[i]
+      
+      # Assign failure times
+      data$time[period_indices] <- runif(failures_by_period[i], 
+                                       min = period_start, 
+                                       max = period_end)
+      data$status[period_indices] <- 1
+      
+      # Update position
+      current_pos <- current_pos + failures_by_period[i]
+    }
+  }
+  
+  return(data)
+}
+
+# Define study parameters
+n_pt <- 90
+n_ht <- 90
+periods <- c(5, 7, 10)
+
+# Generate PT group data (3, 1, 3 failures in the periods)
+pt_data <- generate_group_data(n_pt, c(3, 1, 3), periods)
+pt_data$group <- "PT"
+
+# Generate HT group data (7, 2, 3 failures in the periods)
+ht_data <- generate_group_data(n_ht, c(7, 2, 3), periods)
+ht_data$group <- "HT"
+
+# Combine datasets
+dt <- rbind(pt_data, ht_data)
+dt$group <- factor(dt$group)
+
+# Create survival object
+Graftfit <- survival::survfit(Surv(time, status) ~ group, data = dt)
+
+# Create plotting data frame
+surv_df <- data.frame(
+  time = Graftfit$time,
+  surv = Graftfit$surv,
+  lower = Graftfit$lower,
+  upper = Graftfit$upper,
+  group = rep(names(Graftfit$strata), Graftfit$strata)
+)
+
+# Create plot
+ggplot() +
+  geom_step(data = surv_df, aes(x = time, y = surv, color = group), linewidth = 1) +
+  geom_ribbon(data = surv_df, 
+             aes(x = time, ymin = lower, ymax = upper, fill = group), 
+             alpha = 0.2) +
+  labs(x = "Time (years)", 
+       y = "Survival Probability", 
+       title = "Simulated Survival Curves",
+       color = "Group",
+       fill = "Group") +
+  theme_minimal() +
+  scale_y_continuous(limits = c(0.75, 1)) +
+  scale_color_manual(values = c("group=HT" = "#E41A1C", "group=PT" = "#377EB8"),
+                    labels = c("HT", "PT")) +
+  scale_fill_manual(values = c("group=HT" = "#E41A1C", "group=PT" = "#377EB8"),
+                    labels = c("HT", "PT"))
+
+# Calculate 10-year survival probabilities with confidence intervals
+summary(Graftfit, times = 10)
+
+# Calculate observed hazard ratio
+cox_model <- coxph(Surv(time, status) ~ group, data = dt)
+summary(cox_model)
+
+```
+
+```{r}
+
+SurvDT <- dt |> dplyr::mutate(
+  group = if_else(group == "PT", "C","E")
+  )
+
+powerCT(
+  Surv(time, status) ~ group,
+	SurvDT,
+	90,
+	90,
+	1.07,
+	alpha = 0.05)
+
+```
+
+```{r}
+ssizeCT(
+  Surv(time, status) ~ group, 
+	SurvDT, 
+	power = 0.8, 
+	k = 1, 
+	1.5, 
+	alpha = 0.05
+  )
+```
+
+```{r}
+
+GraftCox <- survival::coxph(
+  Surv(time, status) ~ group,
+  SurvDT
+)
+
+
+Graftzph <- survival::cox.zph(fit = GraftCox, transform="km", terms=TRUE, singledf=FALSE, global=TRUE)
+
+plot(Graftzph)
+```
+
+```{r}
+print(Graftzph)
 ```
 
 ## CONSORT \[7b\] Interim Analyses and Stopping
@@ -761,6 +1041,8 @@ Data assumption was non-parametric. <!--# Come back to this -->
 
 <!--# Methods for additional analyses, such as subgroup analyses and adjusted analyses -->
 
+No subgroup analyses or adjusted analyses were performed. <!--# Double check this -->
+
 # Results
 
 Let's roll through the results by section and make some notes as we go.
@@ -784,6 +1066,8 @@ The followup of patients at the final timepoint is noted in the follow-up sectio
 ## CONSORT \[13b\] Losses and Exclusions per Group
 
 <!--# For each group, losses and exclusions after randomisation, together with reasons -->
+
+This is done reasonably well, but see comments above with respect to differentiating eligibility of different outcome measures.
 
 ## CONSORT \[14a\] Recruitment Period
 
@@ -907,7 +1191,7 @@ Let's try out some checks -see how far we get. Let's use *statcheck* first, see 
 statcheck::checkPDF("~/Pinczewski et al 2007.pdf")
 ```
 
-Not super great, but not surprising either - the results are not formatted in APA style (not unusual for the field).
+This is not surprising - the results are not formatted in APA style (not unusual for the field).
 
 Next, let's see if we can replicate a selection of the p-values. Let's simulate the groups.
 
@@ -1004,6 +1288,8 @@ if (requireNamespace("ggplot2", quietly = TRUE)) {
 ```
 
 
+Survival analysis - confounding by contralateral rupture (more ruptures, less chance of ipsilateral rupture)
+
 
 CONSORT \[17a2\] Outcomes Omitted
 
@@ -1012,6 +1298,8 @@ CONSORT \[17a2\] Outcomes Omitted
 ## CONSORT \[17b\] Binary Outcomes
 
 <!--# For binary outcomes, presentation of both absolute and relative effect sizes is recommended -->
+
+Relative effect sizes are not reported in this trial.
 
 ## CONSORT \[18\] Ancillary Analyses
 
