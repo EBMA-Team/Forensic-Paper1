@@ -454,6 +454,8 @@ No prior trial registration in clinicaltrials.gov. Manual search 17-Feb-2025.
 
 ## CONSORT \[24\] Trial Protocol
 
+<!--# Where the full trial protocol and other relevant documents can be accessed, including additional data on harms -->
+
 This gets a little bit more interesting. The protocol is not described fully in this paper, but is somewhat described throughout the multiple previous papers from the same trial. As far as I can tell though, there was no protocol published prior to the first follow up paper.
 
 Study with follow up at 7 years - [@roe2005]
@@ -551,15 +553,17 @@ This doesnt really have any meaning. Is it that the HS group is being compared t
 
 <!--# Come back to this later -->
 
-## CONSORT \[3b\] Changes to methods after trial commencement
+## CONSORT \[3b\] Changes to methods 
 
-<!--# Come back and check this -->
+<!--# after trial commencement; Come back and check this -->
 
 Changes to eligibility may have altered or been reinterpreted at some point after trial commencement.
 
 # Methods - Participants
 
 ## CONSORT \[4a\] Eligibility criteria
+
+<!--# Not PRO-specific, unless the PROs were used in eligibilityor stratification criteria -->
 
 Recreate eligibility for clarity
 
@@ -602,7 +606,9 @@ Single-centre and single-surgeon study, eligibility criteria for centres and car
 
 ## CONSORT \[6a\] Primary and Secondary
 
-<!--# Completely defined pre-specified primary and secondary outcome measures, including how and when they were assessed -->
+<!--# Completely defined prespecified primary and secondary outcomes, for both benefits and harms, including how and when they were assessed -->
+
+<!--# Evidence of PRO instrument validity and reliability should be provided or cited if available including the person completing the PRO and methods of data collection (paper, telephone, electronic, other) -->
 
 | Category | Outcome | Type | Comments |
 |------------------|------------------|------------------|------------------|
@@ -611,7 +617,7 @@ Single-centre and single-surgeon study, eligibility criteria for centres and car
 |  | Ipsilateral adverse events (complications) | Binary |  |
 |  | Ipsilateral further surgery | Binary |  |
 |  | Harvest site symptoms | Ordinal |  |
-| Subjective symptoms | **Symptoms with strenuous activity (IKDC)** | Ordinal |  |
+| Subjective symptoms | **Symptoms with strenuous activity (IKDC)** | Ordinal | Validity and description of scales? |
 |  | Lysholm Knee Score | Continuous |  |
 |  | Sports participation | Binary |  |
 |  | Knee-related reduction in activity | Binary |  |
@@ -624,6 +630,10 @@ Single-centre and single-surgeon study, eligibility criteria for centres and car
 
 Outcome switching from trial plan - commencement to analysis and reporting is problematic in trials [@altman2017]. This is one of the key weaknesses of this work - the outcomes have been potentially switched from one paper to the next based on interest over time. With no firm primary outcome stated early on in the reporting process or pre-specified, it is entirely possible that reported outcomes have been prioritised based on i) altered levels of interest over time or ii) levels of significance at the time of comparison.
 
+## CONSORT \[6c\] Non-prespecified harms
+
+<!--# Describe if and how non-prespecified outcomes of benefits and harms were identified, including any selection criteria, if applicable -->
+
 # Methods - Sample size
 
 This is the biggest mystery of this paper I think. The methods description is very clear about what the sample size is, but really nothing about how it was determined. The only mention of power is in the discussion of [@pinczewski2002] to say that the study is underpowered for detecting a difference in graft rupture.
@@ -631,6 +641,8 @@ This is the biggest mystery of this paper I think. The methods description is ve
 Ultimately, I can run some simulations here to prove the point, but I just dont think this study was adequately powered for any of the comparisons it has made between the groups.
 
 ## CONSORT \[7a\] Determination
+
+<!--# Not required for PRO unless it is a primary study outcome -->
 
 Not described in the paper.
 
@@ -973,9 +985,9 @@ Patient selection - exclusivity (patients were self-selected based on perioperat
 
 ## CONSORT \[11a\] Blinding (Who)
 
-<!--# If done, who was blinded after assignment to interventions (for example, participants, care providers, those assessing outcomes) and how -->
+<!--# If done, who was blinded after assignment to interventions (for example, participants, care providers, those assessing outcomes of benefits and harms) and how -->
 
-There is no mention of blinding in any of the articles related to this trial. Even if randomisation didnt occur, blinding of everyone involved in the trial (as much as practicable), but particularly those responsible for measurement and analysis is crucial to mitigate potential biases. Especially when industry funding is in the mix.
+There is no mention of blinding in any of the articles related to this trial. Even if randomisation didn't occur, blinding of everyone involved in the trial (as much as practicable), but particularly those responsible for measurement and analysis is crucial to mitigate potential biases. Especially when industry funding is in the mix.
 
 ## CONSORT \[11b\] Intervention Similarity
 
@@ -1049,7 +1061,9 @@ Let's roll through the results by section and make some notes as we go.
 
 ## CONSORT \[13a\] Participant Flow
 
-<!--# For each group, the numbers of participants who were randomly assigned, received intended treatment, and were analysed for the primary outcome -->
+<!--# For each group, the numbers of participants who were randomly assigned, received intended treatment, and were analysed for outcomes of benefits and harms -->\
+\
+<!--# The number of PRO outcome data at baseline and atsubsequent time points should be made transparent -->
 
 Some general comments are;
 
@@ -1177,13 +1191,11 @@ Using a st
 
 <!--# For each group, number of participants (denominator) included in each analysis and whether the analysis was by original assigned groups -->
 
-## CONSORT \[17a\] Outcomes and Estimation
+## CONSORT \[17a1\] Outcomes and Estimation
 
-<!--# For each primary and secondary outcome, results for each group, and the estimated effect size and its precision (such as 95% confidence interval) -->
+<!--# For each primary and secondary outcome of benefits and harms, results for each group, and the estimated effect size and its precision (such as 95% confidence interval) -->
 
 <!--# For multidimensional PRO results from each domain and time point -->
-
-## Scrutiny
 
 Let's try out some checks -see how far we get. Let's use *statcheck* first, see if we can get a bite.
 
@@ -1287,9 +1299,7 @@ if (requireNamespace("ggplot2", quietly = TRUE)) {
 }
 ```
 
-
 We'll check the percentages next
-
 
 ```{r}
 jpap_3 <- tibble::tribble(
@@ -1301,15 +1311,9 @@ jpap_3 <- tibble::tribble(
 )
 ```
 
-
-
-
-
-
 Survival analysis - confounding by contralateral rupture (more ruptures, less chance of ipsilateral rupture)
 
-
-CONSORT \[17a2\] Outcomes Omitted
+## CONSORT \[17a2\] Outcomes Omitted
 
 <!--# For outcomes omitted from the trial report (benefits and harms), provide rationale for not reporting and indicate where the data on omitted outcomes can be accessed -->
 
@@ -1319,21 +1323,37 @@ CONSORT \[17a2\] Outcomes Omitted
 
 Relative effect sizes are not reported in this trial.
 
+## CONSORT \[17c\] Zero Events
+
+<!--# Report zero events if no harms were observed -->
+
 ## CONSORT \[18\] Ancillary Analyses
 
 <!--# Results of any other analyses performed, including subgroup analyses and adjusted analyses, distinguishing pre-specified from exploratory -->
+
+No subgroup or adjusted analyses performed. Exploratory versus pre-specified are not distinguished in the text.
 
 ## CONSORT \[19\] Harms
 
 <!--# All important harms or unintended effects in each group (for specific guidance see CONSORT for harms) -->
 
+This is described reasonably well in the text.
+
 # Discussion
 
 ## CONSORT \[20\] Limitations
 
-<!--# Trial limitations, addressing sources of potential bias, imprecision, and, if relevant, multiplicity of analyses -->
+<!--# Trial limitations, addressing sources of potential bias related to the approach to collecting or reporting data on harms, imprecision, and, if relevant, multiplicity or selection of analyses-->
 
 <!--# P20/21: PRO–specific limitations and implications for generalizability and clinical practice -->
+
+What did the authors cover in their discussion?
+
+-   Lack of randomisation
+
+-   Lack of blinding (blinding was not possible)
+
+-   Inclusion of HT learning curve in analysis
 
 ## CONSORT \[21\] Generalisability
 
