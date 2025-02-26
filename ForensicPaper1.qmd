@@ -37,8 +37,6 @@ I will extend this approach, by encapsulating a review within the contemporary r
 
     -   I have co-authored a paper with Justin Roe [@Oussedik2012].
 
--   I have performed the same analyst role as the person responsible in this trial
-
 -   Am I jealous of the citation record of this article - absolutely not, my interest here is for us to be able to move the conversation forward into the contemporary period and better serve future patients.
 
 ## Preparation
@@ -582,18 +580,29 @@ Changes to eligibility may have altered or been reinterpreted at some point afte
 
 Recreate eligibility for clarity
 
-| Category | Inclusion | Exclusion | Comments |
-|----|----|----|----|
-| Patient | Desire return to competitive activity |  |  |
-| Pathology | Complete ACL rupture | Additional ligament injury such that reconstruction was deemed necessary |  |
-|  | Grade 2 Lachman (or above) | Chondral damage |  |
-|  | Positive pivot shift |  |  |
-| Treatment |  | Meniscal damage such that meniscectomy of \>1/3 of one (medial or lateral) meniscus was required |  |
-| Other | Failed nonoperative treatment | Previous meniscectomy |  |
-|  |  | Abnormal radiographic image |  |
-|  |  | Abnormal contralateral knee |  |
-|  |  | Patients seeking compensation for their injury |  |
-|  |  | Patients who did not wish to participate in a research program |  |
++----------------+---------------------------------------+--------------------------------------------------------------------------------------------------+----------------+
+| Category       | Inclusion                             | Exclusion                                                                                        | Comments       |
++================+=======================================+==================================================================================================+================+
+| Patient        | Desire return to competitive activity |                                                                                                  |                |
++----------------+---------------------------------------+--------------------------------------------------------------------------------------------------+----------------+
+| Pathology      | Complete ACL rupture                  | Additional ligament injury such that reconstruction was deemed necessary                         |                |
++----------------+---------------------------------------+--------------------------------------------------------------------------------------------------+----------------+
+|                | Grade 2 Lachman (or above)            | Chondral damage                                                                                  |                |
++----------------+---------------------------------------+--------------------------------------------------------------------------------------------------+----------------+
+|                | Positive pivot shift                  |                                                                                                  |                |
++----------------+---------------------------------------+--------------------------------------------------------------------------------------------------+----------------+
+| Treatment      |                                       | Meniscal damage such that meniscectomy of \>1/3 of one (medial or lateral) meniscus was required |                |
++----------------+---------------------------------------+--------------------------------------------------------------------------------------------------+----------------+
+| Other          | Failed nonoperative treatment         | Previous meniscectomy                                                                            |                |
++----------------+---------------------------------------+--------------------------------------------------------------------------------------------------+----------------+
+|                |                                       | Abnormal radiographic image                                                                      |                |
++----------------+---------------------------------------+--------------------------------------------------------------------------------------------------+----------------+
+|                |                                       | Abnormal contralateral knee                                                                      |                |
++----------------+---------------------------------------+--------------------------------------------------------------------------------------------------+----------------+
+|                |                                       | Patients seeking compensation for their injury                                                   |                |
++----------------+---------------------------------------+--------------------------------------------------------------------------------------------------+----------------+
+|                |                                       | Patients who did not wish to participate in a research program                                   |                |
++----------------+---------------------------------------+--------------------------------------------------------------------------------------------------+----------------+
 
 <!--# The representativeness of the sample is questionable -->
 
@@ -1062,27 +1071,47 @@ There are a metric tonne of comparisons between groups in this paper. Let's see 
 
 Data assumption was non-parametric. <!--# Come back to this -->
 
-| Category | Outcome | Type | Model - Test | Comments |
-|----|----|----|----|----|
-| Adverse Events | **Ipsilateral graft intact** | Time to event | Nil (KM used to establish survival rates) | A risk table would have been helpful |
-|  | Contralateral ligament intact | Binary; Time to event | Nil (KM used to establish survival rates) | A risk table would have been helpful |
-|  | Ipsilateral adverse events (complications) | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
-|  | Ipsilateral further surgery | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
-|  | Harvest site symptoms | Ordinal | Between-Group: Mann-Whitney U Test |  |
-| Subjective symptoms | **Symptoms with strenuous activity (IKDC)** | Ordinal | Between-Group: Mann-Whitney U Test |  |
-|  | Lysholm Knee Score | Continuous | Between-Group: Mann-Whitney U Test |  |
-|  | Sports participation | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
-|  | Knee-related reduction in activity | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
-|  | Kneeling pain | Continuous | Between-Group: Mann-Whitney U Test |  |
-| Objective testing | **Lachman Grade** | Ordinal | Between-Group: Mann-Whitney U Test |  |
-|  | Pivot Shift | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
-|  | Instrumented Laxity | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
-|  | Range of motion - extension | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
-|  | Single-leg hop test | Binary | Nil |  |
-| Operative Findings | Meniscal Injury | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
-|  | Meniscal Treatment | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
-| Radiographic | IKDC grading x-ray | Ordinal | Between-Group: Mann-Whitney U Test |  |
-| Composite | IDEAL outcome | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
++---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
+| Category            | Outcome                                     | Type                  | Model - Test                              | Comments                             |
++=====================+=============================================+=======================+===========================================+======================================+
+| Adverse Events      | **Ipsilateral graft intact**                | Time to event         | Nil (KM used to establish survival rates) | A risk table would have been helpful |
++---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
+|                     | Contralateral ligament intact               | Binary; Time to event | Nil (KM used to establish survival rates) | A risk table would have been helpful |
++---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
+|                     | Ipsilateral adverse events (complications)  | Binary                | Between-Group: Mann-Whitney U Test        | Suspect not a valid test             |
++---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
+|                     | Ipsilateral further surgery                 | Binary                | Between-Group: Mann-Whitney U Test        | Suspect not a valid test             |
++---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
+|                     | Harvest site symptoms                       | Ordinal               | Between-Group: Mann-Whitney U Test        |                                      |
++---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
+| Subjective symptoms | **Symptoms with strenuous activity (IKDC)** | Ordinal               | Between-Group: Mann-Whitney U Test        |                                      |
++---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
+|                     | Lysholm Knee Score                          | Continuous            | Between-Group: Mann-Whitney U Test        |                                      |
++---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
+|                     | Sports participation                        | Binary                | Between-Group: Mann-Whitney U Test        | Suspect not a valid test             |
++---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
+|                     | Knee-related reduction in activity          | Binary                | Between-Group: Mann-Whitney U Test        | Suspect not a valid test             |
++---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
+|                     | Kneeling pain                               | Continuous            | Between-Group: Mann-Whitney U Test        |                                      |
++---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
+| Objective testing   | **Lachman Grade**                           | Ordinal               | Between-Group: Mann-Whitney U Test        |                                      |
++---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
+|                     | Pivot Shift                                 | Binary                | Between-Group: Mann-Whitney U Test        | Suspect not a valid test             |
++---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
+|                     | Instrumented Laxity                         | Binary                | Between-Group: Mann-Whitney U Test        | Suspect not a valid test             |
++---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
+|                     | Range of motion - extension                 | Binary                | Between-Group: Mann-Whitney U Test        | Suspect not a valid test             |
++---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
+|                     | Single-leg hop test                         | Binary                | Nil                                       |                                      |
++---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
+| Operative Findings  | Meniscal Injury                             | Binary                | Between-Group: Mann-Whitney U Test        | Suspect not a valid test             |
++---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
+|                     | Meniscal Treatment                          | Binary                | Between-Group: Mann-Whitney U Test        | Suspect not a valid test             |
++---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
+| Radiographic        | IKDC grading x-ray                          | Ordinal               | Between-Group: Mann-Whitney U Test        |                                      |
++---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
+| Composite           | IDEAL outcome                               | Binary                | Between-Group: Mann-Whitney U Test        | Suspect not a valid test             |
++---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
 
 ## CONSORT \[12b\] Additional Analyses
 
