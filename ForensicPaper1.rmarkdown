@@ -21,6 +21,8 @@ format:
 bibliography: ForensicPapers.bib
 ---
 
+
+
 # Analysis Preamble
 
 This analysis acts as a training activity to apply techniques described in [Heathers 2024](https://jamesheathers.curve.space/).
@@ -42,6 +44,8 @@ I will extend this approach, by encapsulating a review within the contemporary r
 ## Preparation
 
 Load up required packages in advance. Citations applied to each library at first use in the text.
+
+
 
 ```{r}
 
@@ -103,7 +107,13 @@ pacman::p_load(
 
 ```
 
+
+
+## Pull Retraction Watch
+
 Cloned the RW git repo to the environment to bounce off later.
+
+
 
 ```{r}
 
@@ -123,31 +133,23 @@ git_pull(repo = local_path)
 
 ```
 
+
+
 Load in database
+
+
 
 ```{r}
 Retractions <- read.csv(file.path(local_path, "retraction_watch.csv"))
 ```
 
-## Reporting Framework
 
-To provide some structure to scrutinising this article - the following guidelines were utilised.
-
-CONSORT 2010 - [@moher2010]
-
-CONSORT Abstracts - [@hopewell2008]
-
-CONSORT Parallel group trials - [@moher2010; @consort2010]
-
-CONSORT Nonpharmacologic treatments - [@boutron2017]
-
-CONSORT PRO - [@calvert2013]
-
-CONSORT Harms - [@junqueira2023]
 
 # Selected Citation
 
 [@pinczewski2007]
+
+
 
 ```{r}
 
@@ -160,6 +162,8 @@ Full citation - {rcrossref::cr_cn(dois = targetDOI, format = "text", style = "ap
 
 ```
 
+
+
 ## Selection Rationale
 
 The selected paper appears at number 2 in "The top 100 most cited articles in Australian orthopaedic surgery" [@mcmillan2024].
@@ -168,13 +172,13 @@ It has been cited 288 times (pubmed) or 524 times (crossref), depending on which
 
 [![Metrics of selected citation as of 15-Feb-2025](AJSM%20Metrics.png)](https://journals.sagepub.com/doi/10.1177/0363546506296042)
 
-## Summary
-
 # Bibliometric Analysis
 
 ## The paper
 
 Check if it appears in the RW database
+
+
 
 ```{r}
 
@@ -195,11 +199,15 @@ if_else(
 )
 ```
 
+
+
 There were 0 comments for this paper on PubPeer \[ 15-Feb-2025\].
 
 The burning question remains how this paper is being cited in the contemporary literature, what is the sentiment of this paper? Sentiment analysis of citations [@kilicoglu2019], is a very new concept for me - but I wanted to understand how the paper has been used in citations over the last couple of years.
 
 So I pulled out the last couple of years of citations from the dataframe I drew in from CrossRef.
+
+
 
 ```{r}
 
@@ -212,17 +220,21 @@ CitationRecent <- Citations |> dplyr::select(
 
 ```
 
+
+
 I then took the DOIs and passed them to my reference management software [PaperPile](https://paperpile.com/about/) (PaperPile LLC, USA) and imported them to a folder. The software was able to update the metadata and retrieve fulltext files for those that were open access.
 
-I used the decision framework described by [@kilicoglu2019] to manually label them neutral, positive or negative sentiments with respect to the paper of interest. You can see the results (albeit selective unfortunately) in the table [here](https://docs.google.com/spreadsheets/d/1IYHUTOrSUvxQHVJ94ndt9BwrnIvejDg0EN1xY25k9js/edit?usp=sharing).
+I used the framework described by [@kilicoglu2019] to manually label them neutral, positive or negative sentiments with respect to the paper of interest. You can see the results (albeit selective unfortunately) in the table [here](https://docs.google.com/spreadsheets/d/1IYHUTOrSUvxQHVJ94ndt9BwrnIvejDg0EN1xY25k9js/edit?usp=sharing).
 
-The main takeaway is that the majority are *neutral* and mostly use the paper of interest as a support in the introduction. This might indicate a certain level of self-correction in the literature as the trial gradually loses its relevance to the main topic it attempted to address. Either way, a more detailed analysis with changes in citation patterns over time, and without my selection bias, would be required to understand this fully.
+The main takeaway here is that the majority are *neutral* and mostly use the paper of interest as a support in the introduction. This might indicate a certain level of self-correction in the literature as the trial gradually loses its relevance to the main topic it attempted to address. Either way, a more detailed analysis with changes in citation patterns over time, and without my selection bias, would be required to understand this fully.
 
 ## The authors
 
 So I wrote a function to work through the surnames and bounce them against the RW database. We can argue about validation of this step until the cows come home, but for now I'm fairly satisfied that the individual authors do not have any retractions.
 
 You can see for yourself in the matches table below (maybe I missed one?).
+
+
 
 ```{r}
 library(tidyverse)
@@ -463,6 +475,24 @@ gt::gt(AuthorMatches |> dplyr::select(
 
 ```
 
+
+
+# Reporting Framework
+
+To provide some structure to scrutinising this article - the following guidelines were utilised.
+
+CONSORT 2010 - [@moher2010]
+
+CONSORT Abstracts - [@hopewell2008]
+
+CONSORT Parallel group trials - [@moher2010; @consort2010]
+
+CONSORT Nonpharmacologic treatments - [@boutron2017]
+
+CONSORT PRO - [@calvert2013]
+
+CONSORT Harms - [@junqueira2023]
+
 # Trial Information
 
 So first things first, this study is not a randomised trial. In the methods, it's described as a "prospective controlled trial". More on that later.
@@ -525,13 +555,13 @@ The PROs used in the study are *not* identified in the abstract as primary or s
 
 <!--# P2b: The PRO hypothesis should be stated and relevant domains identified, if applicable -->
 
-*This study represents a report on the long-term outcomes of ACL reconstruction on knee function using an endoscopic technique, as well as a prospective comparison of the isolated effects of one extrinsic variable (graft choice).*
-
 # Methods - External assessment
 
 This paper should have been put through the wringer by SR-MA of graft type in ACL reconstruction. Let's do a quick summary of what others have said about the methods through RoB or methodology assessments in previous reviews.
 
 I retrieved the citation list for this paper from *citationchaser* (the shiny app, I cant be bothered signing up for a plan for the API access) [@Haddaway2022]. It conducts a search through lens.org.
+
+
 
 ```{r}
 
@@ -544,7 +574,11 @@ Citations <- synthesisr::read_refs(
 
 ```
 
+
+
 Filter down for recent systematic reviews
+
+
 
 ```{r}
 
@@ -555,6 +589,8 @@ CitationsSR <- Citations |> dplyr::filter(
 )
 
 ```
+
+
 
 ## Risk of Bias
 
@@ -590,29 +626,18 @@ Changes to eligibility may have altered or been reinterpreted at some point afte
 
 Recreate eligibility for clarity
 
-+-----------+---------------------------------------+--------------------------------------------------------------------------------------------------+----------+
-| Category  | Inclusion                             | Exclusion                                                                                        | Comments |
-+===========+=======================================+==================================================================================================+==========+
-| Patient   | Desire return to competitive activity |                                                                                                  |          |
-+-----------+---------------------------------------+--------------------------------------------------------------------------------------------------+----------+
-| Pathology | Complete ACL rupture                  | Additional ligament injury such that reconstruction was deemed necessary                         |          |
-+-----------+---------------------------------------+--------------------------------------------------------------------------------------------------+----------+
-|           | Grade 2 Lachman (or above)            | Chondral damage                                                                                  |          |
-+-----------+---------------------------------------+--------------------------------------------------------------------------------------------------+----------+
-|           | Positive pivot shift                  |                                                                                                  |          |
-+-----------+---------------------------------------+--------------------------------------------------------------------------------------------------+----------+
-| Treatment |                                       | Meniscal damage such that meniscectomy of \>1/3 of one (medial or lateral) meniscus was required |          |
-+-----------+---------------------------------------+--------------------------------------------------------------------------------------------------+----------+
-| Other     | Failed nonoperative treatment         | Previous meniscectomy                                                                            |          |
-+-----------+---------------------------------------+--------------------------------------------------------------------------------------------------+----------+
-|           |                                       | Abnormal radiographic image                                                                      |          |
-+-----------+---------------------------------------+--------------------------------------------------------------------------------------------------+----------+
-|           |                                       | Abnormal contralateral knee                                                                      |          |
-+-----------+---------------------------------------+--------------------------------------------------------------------------------------------------+----------+
-|           |                                       | Patients seeking compensation for their injury                                                   |          |
-+-----------+---------------------------------------+--------------------------------------------------------------------------------------------------+----------+
-|           |                                       | Patients who did not wish to participate in a research program                                   |          |
-+-----------+---------------------------------------+--------------------------------------------------------------------------------------------------+----------+
+| Category | Inclusion | Exclusion | Comments |
+|----|----|----|----|
+| Patient | Desire return to competitive activity |  |  |
+| Pathology | Complete ACL rupture | Additional ligament injury such that reconstruction was deemed necessary |  |
+|  | Grade 2 Lachman (or above) | Chondral damage |  |
+|  | Positive pivot shift |  |  |
+| Treatment |  | Meniscal damage such that meniscectomy of \>1/3 of one (medial or lateral) meniscus was required |  |
+| Other | Failed nonoperative treatment | Previous meniscectomy |  |
+|  |  | Abnormal radiographic image |  |
+|  |  | Abnormal contralateral knee |  |
+|  |  | Patients seeking compensation for their injury |  |
+|  |  | Patients who did not wish to participate in a research program |  |
 
 <!--# The representativeness of the sample is questionable -->
 
@@ -700,6 +725,8 @@ Ultimately, I can run some simulations here to prove the point, but I just dont 
 
 Not described in the paper.
 
+
+
 ```{r}
 
 pwrss.z.2props(
@@ -716,11 +743,15 @@ pwrss.z.2props(
 
 ```
 
+
+
 We'll turn our attention to the time to event analysis of graft rupture.
 
 First - simulate a time to event dataset based on the reported findings.
 
 The 10 year survival was 86 (95%CI 79 - 94) for the HT group and 92 (95%CI 86 - 98) for the PT group
+
+
 
 ```{epoxy}
 
@@ -730,7 +761,11 @@ The 10 year survival was 86% (95%CI 79 - 94) for the HT group and 92% (95%CI 86 
 
 ```
 
+
+
 We can reproduce the survival
+
+
 
 ```{r}
 
@@ -999,6 +1034,8 @@ plot(Graftzph)
 print(Graftzph)
 ```
 
+
+
 ## CONSORT \[7b\] Interim Analyses and Stopping
 
 The series of papers making up reporting of this trial really needed a more comprehensive approach to stopping parameters and planning for interim analyses, at what turned out to be 5, 7 and 10 year follow ups.
@@ -1081,47 +1118,27 @@ There are a metric tonne of comparisons between groups in this paper. Let's see 
 
 Data assumption was non-parametric. <!--# Come back to this -->
 
-+---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
-| Category            | Outcome                                     | Type                  | Model - Test                              | Comments                             |
-+=====================+=============================================+=======================+===========================================+======================================+
-| Adverse Events      | **Ipsilateral graft intact**                | Time to event         | Nil (KM used to establish survival rates) | A risk table would have been helpful |
-+---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
-|                     | Contralateral ligament intact               | Binary; Time to event | Nil (KM used to establish survival rates) | A risk table would have been helpful |
-+---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
-|                     | Ipsilateral adverse events (complications)  | Binary                | Between-Group: Mann-Whitney U Test        | Suspect not a valid test             |
-+---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
-|                     | Ipsilateral further surgery                 | Binary                | Between-Group: Mann-Whitney U Test        | Suspect not a valid test             |
-+---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
-|                     | Harvest site symptoms                       | Ordinal               | Between-Group: Mann-Whitney U Test        |                                      |
-+---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
-| Subjective symptoms | **Symptoms with strenuous activity (IKDC)** | Ordinal               | Between-Group: Mann-Whitney U Test        |                                      |
-+---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
-|                     | Lysholm Knee Score                          | Continuous            | Between-Group: Mann-Whitney U Test        |                                      |
-+---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
-|                     | Sports participation                        | Binary                | Between-Group: Mann-Whitney U Test        | Suspect not a valid test             |
-+---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
-|                     | Knee-related reduction in activity          | Binary                | Between-Group: Mann-Whitney U Test        | Suspect not a valid test             |
-+---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
-|                     | Kneeling pain                               | Continuous            | Between-Group: Mann-Whitney U Test        |                                      |
-+---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
-| Objective testing   | **Lachman Grade**                           | Ordinal               | Between-Group: Mann-Whitney U Test        |                                      |
-+---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
-|                     | Pivot Shift                                 | Binary                | Between-Group: Mann-Whitney U Test        | Suspect not a valid test             |
-+---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
-|                     | Instrumented Laxity                         | Binary                | Between-Group: Mann-Whitney U Test        | Suspect not a valid test             |
-+---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
-|                     | Range of motion - extension                 | Binary                | Between-Group: Mann-Whitney U Test        | Suspect not a valid test             |
-+---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
-|                     | Single-leg hop test                         | Binary                | Nil                                       |                                      |
-+---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
-| Operative Findings  | Meniscal Injury                             | Binary                | Between-Group: Mann-Whitney U Test        | Suspect not a valid test             |
-+---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
-|                     | Meniscal Treatment                          | Binary                | Between-Group: Mann-Whitney U Test        | Suspect not a valid test             |
-+---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
-| Radiographic        | IKDC grading x-ray                          | Ordinal               | Between-Group: Mann-Whitney U Test        |                                      |
-+---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
-| Composite           | IDEAL outcome                               | Binary                | Between-Group: Mann-Whitney U Test        | Suspect not a valid test             |
-+---------------------+---------------------------------------------+-----------------------+-------------------------------------------+--------------------------------------+
+| Category | Outcome | Type | Model - Test | Comments |
+|----|----|----|----|----|
+| Adverse Events | **Ipsilateral graft intact** | Time to event | Nil (KM used to establish survival rates) | A risk table would have been helpful |
+|  | Contralateral ligament intact | Binary; Time to event | Nil (KM used to establish survival rates) | A risk table would have been helpful |
+|  | Ipsilateral adverse events (complications) | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
+|  | Ipsilateral further surgery | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
+|  | Harvest site symptoms | Ordinal | Between-Group: Mann-Whitney U Test |  |
+| Subjective symptoms | **Symptoms with strenuous activity (IKDC)** | Ordinal | Between-Group: Mann-Whitney U Test |  |
+|  | Lysholm Knee Score | Continuous | Between-Group: Mann-Whitney U Test |  |
+|  | Sports participation | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
+|  | Knee-related reduction in activity | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
+|  | Kneeling pain | Continuous | Between-Group: Mann-Whitney U Test |  |
+| Objective testing | **Lachman Grade** | Ordinal | Between-Group: Mann-Whitney U Test |  |
+|  | Pivot Shift | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
+|  | Instrumented Laxity | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
+|  | Range of motion - extension | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
+|  | Single-leg hop test | Binary | Nil |  |
+| Operative Findings | Meniscal Injury | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
+|  | Meniscal Treatment | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
+| Radiographic | IKDC grading x-ray | Ordinal | Between-Group: Mann-Whitney U Test |  |
+| Composite | IDEAL outcome | Binary | Between-Group: Mann-Whitney U Test | Suspect not a valid test |
 
 ## CONSORT \[12b\] Additional Analyses
 
@@ -1183,6 +1200,8 @@ No description of trial termination in the methods. However, there is a section 
 
 <!--# Including baseline PRO data when collected -->
 
+
+
 ```{r}
 Group1 = list(
   FemaleCount = 42,
@@ -1203,9 +1222,13 @@ Group2$AgeSDEst = (Group2$AgeMax-Group2$AgeMin)/2
 
 ```
 
+
+
 Well, first of all - I'm not sure this would pass HREC in this day and age. ACL reconstruction in skeletally immature individuals is a different set of ethical considerations to adults and I'm not sure that would pass muster in the present environment. Considering the narrowness of the inclusion critera, adding in immature patients into the sample is an interesting choice.
 
 The IKDC is also not validated for paediatric patients. In their defence, the paediatric version of the IKDC would not be published for another decade [@nasreddine2016]. It is also contended that the Lysholm is not validated for paediatric populations [@fabricant2020].
+
+
 
 ```{r}
 SexCheck <- list(
@@ -1220,7 +1243,11 @@ The proportion of females {round(SexCheck$Group1$estimate)} ({round(SexCheck$Gro
 
 ```
 
+
+
 Comparison between groups for age as reported
+
+
 
 ```{r}
 
@@ -1232,7 +1259,11 @@ SexCheck$GroupCom = prop.test(
 
 ```
 
+
+
 Now let's have a look at age.
+
+
 
 ```{r}
 scrutiny::grim(as.character(Group1$AgeMedian), n = 90)
@@ -1242,7 +1273,11 @@ scrutiny::grim(as.character(Group1$AgeMedian), n = 90)
 scrutiny::grim(as.character(Group2$AgeMedian), n = 90)
 ```
 
+
+
 Do a comparison - we have to assume the median and the means are the same in this sample.
+
+
 
 ```{r}
 
@@ -1261,6 +1296,8 @@ Using a st
 
 ```
 
+
+
 \
 
 ## CONSORT \[16\] Numbers Analysed
@@ -1275,13 +1312,19 @@ Using a st
 
 Let's try out some checks -see how far we get. Let's use *statcheck* first, see if we can get a bite.
 
+
+
 ```{r}
 statcheck::checkPDF("~/Pinczewski et al 2007.pdf")
 ```
 
+
+
 This is not surprising - the results are not formatted in APA style (not unusual for the field).
 
 Next, let's see if we can replicate a selection of the p-values. Let's simulate the groups.
+
+
 
 ```{r, warning= FALSE}
 # Function to generate one dataset and run test
@@ -1375,7 +1418,11 @@ if (requireNamespace("ggplot2", quietly = TRUE)) {
 }
 ```
 
+
+
 We'll check the percentages next
+
+
 
 ```{r}
 jpap_3 <- tibble::tribble(
@@ -1386,6 +1433,8 @@ jpap_3 <- tibble::tribble(
   "39.3",  516,
 )
 ```
+
+
 
 Survival analysis - confounding by contralateral rupture (more ruptures, less chance of ipsilateral rupture)
 
@@ -1448,3 +1497,4 @@ The question that arises from the present review is the lack of equipoise in the
 <!--# PRO data should be interpreted in relation to clinical outcomes including survival data, where relevant -->
 
 # References
+
