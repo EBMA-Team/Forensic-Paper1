@@ -9,7 +9,7 @@ type: website
 editor: visual
 code-annotations: true
 execute: 
-  echo: false
+  echo: true
   warning: false
   message: false
 format:
@@ -170,7 +170,37 @@ It has been cited 288 times (pubmed) or 524 times (crossref), depending on which
 
 ## Summary
 
+You can review the abstract for this paper [here](https://journals.sagepub.com/doi/10.1177/0363546506296042). In brief, this was an attempted RCT comparing two ways of reconstructing the anterior cruciate ligament in patients participating in high levels of competitive sport at the time of injury. The target paper is the 10-year follow up of the comparison between groups, with previous reports at 2, 5 and 7 year follow ups.
+
 # Bibliometric Analysis
+
+The burning question was how this paper is being cited in the contemporary literature, what is the sentiment of this paper? Sentiment analysis of citations [@kilicoglu2019], is a very new concept for me - but I wanted to understand how the paper has been used in citations over the last couple of years.
+
+I retrieved the citation list for this paper from *citationchaser* (the shiny app, I cant be bothered signing up for a plan for the API access) [@Haddaway2022]. It conducts a search through lens.org.
+
+```{r}
+
+Citations <- synthesisr::read_refs(
+  filename = "C:/Users/cscho//Documents/GitHub/Forensic-Paper1/Paper1Citations",
+  tag_naming = "wos",
+  return_df = TRUE,
+  verbose = TRUE
+)
+
+```
+
+Then I pulled out the last couple of years of citations.
+
+```{r}
+CitationRecent <- Citations |> dplyr::select(   year,   DO ) |> dplyr::filter(   year > 2022 )
+```
+
+
+I then took the DOIs and passed them to my reference management software [PaperPile](https://paperpile.com/about/) (PaperPile LLC, USA) and imported them to a folder. The software was able to update the metadata and retrieve fulltext files for those that were open access.
+
+I used the decision framework described by [@kilicoglu2019] to manually label them neutral, positive or negative sentiments with respect to the paper of interest. You can see the results (albeit selective unfortunately) in the table [here](https://docs.google.com/spreadsheets/d/1IYHUTOrSUvxQHVJ94ndt9BwrnIvejDg0EN1xY25k9js/edit?usp=sharing).
+
+The main takeaway is that the majority are *neutral* and mostly use the paper of interest as a support in the introduction. This might indicate a certain level of self-correction in the literature as the trial steadily loses its relevance to the main topic it attempted to address. Either way, a more detailed analysis with changes in citation patterns over time, and without my selection bias, would be required to understand this fully.
 
 ## The paper
 
@@ -196,27 +226,6 @@ if_else(
 ```
 
 There were 0 comments for this paper on PubPeer \[ 15-Feb-2025\].
-
-The burning question remains how this paper is being cited in the contemporary literature, what is the sentiment of this paper? Sentiment analysis of citations [@kilicoglu2019], is a very new concept for me - but I wanted to understand how the paper has been used in citations over the last couple of years.
-
-So I pulled out the last couple of years of citations from the dataframe I drew in from CrossRef.
-
-```{r}
-
-CitationRecent <- Citations |> dplyr::select(
-  year,
-  DO
-) |> dplyr::filter(
-  year > 2022
-)
-
-```
-
-I then took the DOIs and passed them to my reference management software [PaperPile](https://paperpile.com/about/) (PaperPile LLC, USA) and imported them to a folder. The software was able to update the metadata and retrieve fulltext files for those that were open access.
-
-I used the decision framework described by [@kilicoglu2019] to manually label them neutral, positive or negative sentiments with respect to the paper of interest. You can see the results (albeit selective unfortunately) in the table [here](https://docs.google.com/spreadsheets/d/1IYHUTOrSUvxQHVJ94ndt9BwrnIvejDg0EN1xY25k9js/edit?usp=sharing).
-
-The main takeaway is that the majority are *neutral* and mostly use the paper of interest as a support in the introduction. This might indicate a certain level of self-correction in the literature as the trial gradually loses its relevance to the main topic it attempted to address. Either way, a more detailed analysis with changes in citation patterns over time, and without my selection bias, would be required to understand this fully.
 
 ## The authors
 
@@ -469,7 +478,7 @@ So first things first, this study is not a randomised trial. In the methods, it'
 
 ## CONSORT \[23\] Registration
 
-No prior trial registration in clinicaltrials.gov. Manual search 17-Feb-2025.
+No prior trial registration in clinicaltrials.gov. Manual search performed 17-Feb-2025.
 
 ## CONSORT \[24\] Trial Protocol
 
@@ -513,11 +522,55 @@ The title identifies the study as a "prospective controlled trial".
 
 The PROs used in the study are *not* identified in the abstract as primary or secondary outcomes in the trial.
 
++--------------------------------+-------------------+---------------------------------------------------------+
+| Item                           | Present \| Absent | Comments                                                |
++================================+===================+=========================================================+
+| Title (identify as randomised) | Not applicable    |                                                         |
++--------------------------------+-------------------+---------------------------------------------------------+
+| Trial design                   | Absent            |                                                         |
++--------------------------------+-------------------+---------------------------------------------------------+
+| Methods                        | Present           | Eliibility criteria for participants - but not settings |
+|                                |                   |                                                         |
+| -   Participants               | Present           | Primary outcome not defined                             |
+|                                |                   |                                                         |
+| -   Interventions              | Present           |                                                         |
+|                                |                   |                                                         |
+| -   Outcome                    | Not applicable    |                                                         |
+|                                |                   |                                                         |
+| -   Randomisation              | Absent            |                                                         |
+|                                |                   |                                                         |
+| -   Blinding                   |                   |                                                         |
++--------------------------------+-------------------+---------------------------------------------------------+
+| Results                        | Not applicable    | The denominator in graft failure is inaccurate          |
+|                                |                   |                                                         |
+| -   Numbers randomised         | Absent            |                                                         |
+|                                |                   |                                                         |
+| -   Recruitment                | Absent            |                                                         |
+|                                |                   |                                                         |
+| -   Numbers analysed           | Present           |                                                         |
+|                                |                   |                                                         |
+| -   Outcome                    | Present           |                                                         |
+|                                |                   |                                                         |
+| -   Harms                      |                   |                                                         |
++--------------------------------+-------------------+---------------------------------------------------------+
+| Conclusions                    | Present           |                                                         |
++--------------------------------+-------------------+---------------------------------------------------------+
+| Trial registration             | Absent            |                                                         |
++--------------------------------+-------------------+---------------------------------------------------------+
+| Funding                        | Absent            |                                                         |
++--------------------------------+-------------------+---------------------------------------------------------+
+
+: Summary of CONSORT Abstract Guidelines
+
 # Introduction
 
 ## CONSORT \[2a\] Scientific Background and Explanation
 
 <!--# Including background and rationale for PRO assessment -->
+
+An important element of a clinical trial in this domain is to establish the *clinical equipoise* of the interventions and I dont think this was established here at all. In the present day, we have frameworks such as IDEAL that were developed specifically for the introduction of new surgical techniques and devices, that provide a graduated approach to preparing and supporting the concept of equipoise between the new and incumbent surgical treatments. While the introduction lays out different graft options for ACL reconstruction, it could have done more to establish the equivalent expectations of outcomes after graft selection.
+
+Importantly there is no background or rationale stated for assessment of patient-reported outcomes.
 
 ## CONSORT \[2b\] Specific Objectives or Hypotheses
 
@@ -525,26 +578,19 @@ The PROs used in the study are *not* identified in the abstract as primary or s
 
 <!--# P2b: The PRO hypothesis should be stated and relevant domains identified, if applicable -->
 
-*This study represents a report on the long-term outcomes of ACL reconstruction on knee function using an endoscopic technique, as well as a prospective comparison of the isolated effects of one extrinsic variable (graft choice).*
+The paper aim as stated;
+
+> *This study represents a report on the long-term outcomes of ACL reconstruction on knee function using an endoscopic technique, as well as a prospective comparison of the isolated effects of one extrinsic variable (graft choice).*
+
+Herein lies many of the problems I have with this paper. It doesnt follow a *pico(s)* structure first introduced by [@thewell1995], with the *s* a more recent introduction \[citation\] representing the study design. Without a focused question following this structure, it becomes difficult to assess whether the trial is appropriately reported or adequately structured to address its primary aim. In addition, there are no specific objectives or hypotheses related to outcomes of benefits or harms (as per CONSORT Harms) and no mention of patient-reported outcomes (as per CONSORT PRO extension).
 
 # Methods - External assessment
 
 This paper should have been put through the wringer by SR-MA of graft type in ACL reconstruction. Let's do a quick summary of what others have said about the methods through RoB or methodology assessments in previous reviews.
 
-I retrieved the citation list for this paper from *citationchaser* (the shiny app, I cant be bothered signing up for a plan for the API access) [@Haddaway2022]. It conducts a search through lens.org.
 
-```{r}
 
-Citations <- synthesisr::read_refs(
-  filename = "C:/Users/cscho//Documents/GitHub/Forensic-Paper1/Paper1Citations",
-  tag_naming = "wos",
-  return_df = TRUE,
-  verbose = TRUE
-)
-
-```
-
-Filter down for recent systematic reviews
+Filter down the citation list for recent systematic reviews
 
 ```{r}
 
@@ -558,11 +604,7 @@ CitationsSR <- Citations |> dplyr::filter(
 
 ## Risk of Bias
 
-One systematic review [@janssen2017] used the Cochrane library checklist for RCTs, with two reviewers conducting independent ratings. The authors classified this trial as a *clinical controlled trial* (no formal randomisation). The overall rating from the combined checklist score was *Questionable (*score was between 30% and 50%).
-
-A more recent review [@sollberger2022] attempted to assess long term results after ACLR with PT vs HS autograft with a min follow up of 10 years, but did not include this paper in their analysis.
-
-Another review [@migliorini2020] included it in their quality assessment, but did not break down their RoB ratings by individual paper.
+One systematic review [@janssen2017] used the Cochrane library checklist for RCTs, with two reviewers conducting independent ratings. The authors classified this trial as a *clinical controlled trial* (no formal randomisation). The overall rating from the combined checklist score was *Questionable (*score was between 30% and 50%). A more recent review [@sollberger2022] attempted to assess long term results after ACLR with PT vs HS autograft with a min follow up of 10 years, but did not include this paper in their analysis. Another review [@migliorini2020] included it in their quality assessment, but did not break down their RoB ratings by individual paper.
 
 # Methods - Trial Design
 
@@ -586,33 +628,33 @@ Changes to eligibility may have altered or been reinterpreted at some point afte
 
 ## CONSORT \[4a\] Eligibility criteria
 
-<!--# Not PRO-specific, unless the PROs were used in eligibilityor stratification criteria -->
+<!--# Not PRO-specific, unless the PROs were used in eligibility or stratification criteria -->
 
 Recreate eligibility for clarity
 
-+-----------+---------------------------------------+--------------------------------------------------------------------------------------------------+----------+
-| Category  | Inclusion                             | Exclusion                                                                                        | Comments |
-+===========+=======================================+==================================================================================================+==========+
-| Patient   | Desire return to competitive activity |                                                                                                  |          |
-+-----------+---------------------------------------+--------------------------------------------------------------------------------------------------+----------+
-| Pathology | Complete ACL rupture                  | Additional ligament injury such that reconstruction was deemed necessary                         |          |
-+-----------+---------------------------------------+--------------------------------------------------------------------------------------------------+----------+
-|           | Grade 2 Lachman (or above)            | Chondral damage                                                                                  |          |
-+-----------+---------------------------------------+--------------------------------------------------------------------------------------------------+----------+
-|           | Positive pivot shift                  |                                                                                                  |          |
-+-----------+---------------------------------------+--------------------------------------------------------------------------------------------------+----------+
-| Treatment |                                       | Meniscal damage such that meniscectomy of \>1/3 of one (medial or lateral) meniscus was required |          |
-+-----------+---------------------------------------+--------------------------------------------------------------------------------------------------+----------+
-| Other     | Failed nonoperative treatment         | Previous meniscectomy                                                                            |          |
-+-----------+---------------------------------------+--------------------------------------------------------------------------------------------------+----------+
-|           |                                       | Abnormal radiographic image                                                                      |          |
-+-----------+---------------------------------------+--------------------------------------------------------------------------------------------------+----------+
-|           |                                       | Abnormal contralateral knee                                                                      |          |
-+-----------+---------------------------------------+--------------------------------------------------------------------------------------------------+----------+
-|           |                                       | Patients seeking compensation for their injury                                                   |          |
-+-----------+---------------------------------------+--------------------------------------------------------------------------------------------------+----------+
-|           |                                       | Patients who did not wish to participate in a research program                                   |          |
-+-----------+---------------------------------------+--------------------------------------------------------------------------------------------------+----------+
++-----------+---------------------------------------+--------------------------------------------------------------------------------------------------+-----------+
+| Category  | Inclusion                             | Exclusion                                                                                        | Comments  |
++===========+=======================================+==================================================================================================+===========+
+| Patient   | Desire return to competitive activity |                                                                                                  |           |
++-----------+---------------------------------------+--------------------------------------------------------------------------------------------------+-----------+
+| Pathology | Complete ACL rupture                  | Additional ligament injury such that reconstruction was deemed necessary                         |           |
++-----------+---------------------------------------+--------------------------------------------------------------------------------------------------+-----------+
+|           | Grade 2 Lachman (or above)            | Chondral damage                                                                                  |           |
++-----------+---------------------------------------+--------------------------------------------------------------------------------------------------+-----------+
+|           | Positive pivot shift                  |                                                                                                  |           |
++-----------+---------------------------------------+--------------------------------------------------------------------------------------------------+-----------+
+| Treatment |                                       | Meniscal damage such that meniscectomy of \>1/3 of one (medial or lateral) meniscus was required |           |
++-----------+---------------------------------------+--------------------------------------------------------------------------------------------------+-----------+
+| Other     | Failed nonoperative treatment         | Previous meniscectomy                                                                            |           |
++-----------+---------------------------------------+--------------------------------------------------------------------------------------------------+-----------+
+|           |                                       | Abnormal radiographic image                                                                      |           |
++-----------+---------------------------------------+--------------------------------------------------------------------------------------------------+-----------+
+|           |                                       | Abnormal contralateral knee                                                                      |           |
++-----------+---------------------------------------+--------------------------------------------------------------------------------------------------+-----------+
+|           |                                       | Patients seeking compensation for their injury                                                   |           |
++-----------+---------------------------------------+--------------------------------------------------------------------------------------------------+-----------+
+|           |                                       | Patients who did not wish to participate in a research program                                   |           |
++-----------+---------------------------------------+--------------------------------------------------------------------------------------------------+-----------+
 
 <!--# The representativeness of the sample is questionable -->
 
@@ -1446,5 +1488,7 @@ The question that arises from the present review is the lack of equipoise in the
 <!--# Interpretation consistent with results, balancing benefits and harms, and considering other relevant evidence -->
 
 <!--# PRO data should be interpreted in relation to clinical outcomes including survival data, where relevant -->
+
+Insert a balanced appraisal here
 
 # References
