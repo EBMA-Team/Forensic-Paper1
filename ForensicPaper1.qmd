@@ -1080,17 +1080,21 @@ Patient selection - exclusivity (patients were self-selected based on perioperat
 
 <!--# What could have been done to strengthen the comparisons  -->
 
-## CONSORT \[8a\] Sequence Method
+## CONSORT \[8a - 10\] 
 
-## CONSORT \[8b\] Sequence Type
+-   Sequence Method
+
+-   Sequence Type
+
+-   Allocation Concealment
+
+-   Implementation
+
+Not reported in this trial.
 
 <!--# Type of randomisation; details of any restriction (such as blocking and block size) -->
 
-## CONSORT \[9\] Allocation concealment
-
 <!--# Mechanism used to implement the random allocation sequence (such as sequentially numbered containers),describing any steps taken to conceal the sequence until interventions were assigned -->
-
-## CONSORT \[10\] Implementation
 
 <!--# Who generated the random allocation sequence, who enrolled participants, and who assigned participants to interventions -->
 
