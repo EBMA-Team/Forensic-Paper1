@@ -782,43 +782,68 @@ I'm going to start with the *IDEAL* *outcome* (see CONSORT 6a) and assess the ac
 
 So I created the datatable of groupings directly using the numbers described in Table 5 of the paper. This *should* be the floor sample sizes available, given the availability of assessment data for both groups. Ran a quick check to make sure the numbers came across ok.
 
-```{r}
-
-set.seed(2065)
-
-dt <- genData(111)
-
-dt$Graft <- c(rep(0, 58), rep(1, 53))
-
-#def <- defData(varname = "male", formula = .4, dist = "binary")
-
-dt[, .N, keyby = Graft] |> gt::gt()
-
-```
-
 But then when I tried to recreate the outcome vector, I was convinced I was going mad - as I couldnt get the proportions to replicate what was in the paper. I spent ages fiddling around with rounding the proportions to no avail, so here is the original reporting with code below.
 
 ```{r}
+
+dt1 <- genData(1110)
+
+dt1$Graft <- c(rep(0, 580), rep(1, 530))
 
 set.seed(2065)
 # Define the conditions
 defC <- defCondition(
   condition = "Graft == 0",
-  formula = "0.69",
-  dist = "binary"
+  formula = 0.689655,
+  dist = "binary",
+  link = "identity"
                     )
 defC <- defCondition(
   defC, 
   condition = "Graft == 1",
-  formula = "0.47",
-  dist = "binary"
+  formula = 0.471698,
+  dist = "binary",
+  link = "identity"
                     )
 
 # Generate the outcome based on conditions
-dt1 <- addCondition(defC, dt, newvar = "outcome")
+dt2 <- addCondition(defC, dt1, newvar = "outcome")
 
 # Verify the rates
-dt1[, mean(outcome), by = Graft] |> gt::gt() |> fmt_number(columns = V1, decimals = 2)
+dt2[, mean(outcome), by = Graft] |> gt::gt() |> fmt_number(columns = V1, decimals = 3)
+
+```
+
+```{epoxy}
+
+Eventually, I had to resort to a manual back-calculation combined with rounding to estimate the positive cases in the HT group (n = {round(0.69*58,0)}) and the PT group (n = {round(0.47*53, 0)}).
+
+```
+
+Plugging those numbers in, the dataframe could be replicated.
+
+```{r}
+
+set.seed(2065)
+
+# Create base data frame
+IdealSim <- data.frame(id = 1:111)
+
+# First assign the Graft variable
+IdealSim$Graft <- c(rep(0, 58), rep(1, 53))
+
+# Then assign outcomes separately for each group
+IdealSim$Outcome <- NA  # Initialize with NA
+IdealSim$Outcome[IdealSim$Graft == 0] <- c(rep(0, 18), rep(1, 40))
+IdealSim$Outcome[IdealSim$Graft == 1] <- c(rep(0, 28), rep(1, 25))
+
+# Verify
+table(IdealSim$Graft, IdealSim$Outcome)
+
+# Or simply
+IdealSim %>%
+  group_by(Graft) %>%
+  summarize(proportion = mean(Outcome))
 
 ```
 
@@ -827,27 +852,145 @@ So this led to the *scrutiny* package (v`{r} utils::packageVersion("scrutiny")`)
 ```{r}
 
 scrutiny::grim(
-  x = "0.69",
+  x = "69",
   n = 58,
-  percent = FALSE
+  percent = TRUE
 )
 
 scrutiny::grim(
-  x = "0.47",
+  x = "47",
   n = 53,
-  percent = FALSE
+  percent = TRUE
 )
 
 # Enter `x` as a string to preserve trailing zeros:
-grim_probability(x = "0.47", n = 53, percent = TRUE)
+grim_probability(x = "69", n = 58, percent = TRUE)
+
+```
+
+Write a function to simulate the *same* between-group test.
+
+```{r}
+
+# Function to run 1000 Wilcoxon tests on simulated data
+run_wilcoxon_simulation <- function(data, outcome_var, group_var, n_sims = 1000, alpha = 0.05) {
+  # Input validation
+  if (!is.data.frame(data)) {
+    stop("Input must be a data frame")
+  }
+  
+  if (!(outcome_var %in% names(data))) {
+    stop(paste("Variable", outcome_var, "not found in data"))
+  }
+  
+  if (!(group_var %in% names(data))) {
+    stop(paste("Variable", group_var, "not found in data"))
+  }
+  
+  # Create formula
+  formula_str <- paste(outcome_var, "~", group_var)
+  test_formula <- as.formula(formula_str)
+  
+  # Initialize results storage
+  results <- data.frame(
+    sim_id = 1:n_sims,
+    w_stat = numeric(n_sims),
+    p_value = numeric(n_sims),
+    significant = logical(n_sims)
+  )
+  
+  # Set seed for reproducibility
+  set.seed(2065)
+  
+  # Get unique groups and sample sizes for bootstrap
+  unique_groups <- unique(data[[group_var]])
+  if (length(unique_groups) != 2) {
+    warning("Group variable should have exactly 2 levels for Wilcoxon test")
+  }
+  
+  group1_data <- data[data[[group_var]] == unique_groups[1], ]
+  group2_data <- data[data[[group_var]] == unique_groups[2], ]
+  
+  n1 <- nrow(group1_data)
+  n2 <- nrow(group2_data)
+  
+  # Run simulations
+  for (i in 1:n_sims) {
+    # Create bootstrap samples by sampling with replacement
+    bootstrap_sample1 <- group1_data[sample(1:n1, n1, replace = TRUE), ]
+    bootstrap_sample2 <- group2_data[sample(1:n2, n2, replace = TRUE), ]
+    
+    # Combine the samples
+    bootstrap_data <- rbind(bootstrap_sample1, bootstrap_sample2)
+    
+    # Run the Wilcoxon test
+    test_result <- wilcox.test(test_formula, data = bootstrap_data)
+    
+    # Store results
+    results$w_stat[i] <- test_result$statistic
+    results$p_value[i] <- test_result$p.value
+    results$significant[i] <- test_result$p.value < alpha
+  }
+  
+  # Add summary statistics
+  attr(results, "summary") <- list(
+    mean_w_stat = mean(results$w_stat),
+    median_w_stat = median(results$w_stat),
+    mean_p_value = mean(results$p_value),
+    median_p_value = median(results$p_value),
+    significant_proportion = mean(results$significant),
+    power = sum(results$significant) / n_sims
+  )
+  
+  return(results)
+}
+
+
+
+
+```
+
+Run the simulations and plot the results.
+
+```{r}
+# 
+
+# Run 1000 Wilcoxon tests
+IdealTest <- run_wilcoxon_simulation(
+  data = IdealSim,
+  outcome_var = "Outcome",
+  group_var = "Graft",
+  n_sims = 1000
+)
+
+```
+
+Table up the results;
+
+```{r}
+
+tbl_summary(
+  IdealTest,
+  include = !sim_id,
+  digits = list(
+    all_categorical() ~ 1
+  ))
 
 ```
 
 ```{epoxy}
 
+The proportion of tests with a p-value < 0.05 was {nrow(IdealTest |> filter(p_value < 0.05))/1000}. 
+
 ```
 
-This one sits just on the margin of acceptability (\~0.80), but I can already hear the angry comments getting typed up to reply "it's close enough, back off". I think its a margin call, but either way it needs to be brought into the discussion about this trial.
+and here is the distribution of p-values
+
+```{r}
+
+# Plot histogram of p-values
+hist(IdealTest$p_value, breaks = 20, main = "Distribution of p-values", xlab = "p-value")
+```
 
 Next, we'll turn our attention to the time to event analysis of graft rupture.
 
@@ -859,7 +1002,7 @@ The 10 year survival was 86% (95%CI 79 - 94) for the HT group and 92% (95%CI 86 
 
 ```
 
-I wrote a (fairly lengthy) function to simulate the dataset and re-plot the survival curves using *survival* (v`{r} utils::packageVersion("survival")`) [@survival] and *ggplot2* (v`{r} utils::packageVersion("ggplot2")`) [@ggplot2] packages.
+I wrote a (fairly lengthy) function to simulate the dataset and re-plot the survival curves using *survival* (v`{r} utils::packageVersion("survival")`) [@survival] and *ggsurvfit* (v`{r} utils::packageVersion("ggsurvfit")`) [@ggplot2] packages.
 
 ```{r}
 
@@ -979,7 +1122,7 @@ SurvDT <- dt |> dplyr::mutate(
   group = if_else(group == "PT", "C","E")
   )
 
-powerCT(
+SurvPowerChk <- powerCT(
   Surv(time, status) ~ group,
 	SurvDT,
 	90,
@@ -987,17 +1130,6 @@ powerCT(
 	1.07,
 	alpha = 0.05)
 
-```
-
-```{r}
-ssizeCT(
-  Surv(time, status) ~ group, 
-	SurvDT, 
-	power = 0.8, 
-	k = 1, 
-	1.5, 
-	alpha = 0.05
-  )
 ```
 
 ```{r}
@@ -1211,6 +1343,13 @@ No baseline PRO data was collected for this study.
 
 Now let's do a few checks on the demographics, starting with a quick rehash of the key data reported in the paper.
 
+| Col1            | PT  | HT  |
+|-----------------|-----|-----|
+| Females (Count) | 42  | 43  |
+| Age (Median)    | 25  | 24  |
+| Age (Min)       | 13  | 13  |
+| Age (Max)       | 42  | 52  |
+
 ```{r}
 Group1 = list(
   FemaleCount = 42,
@@ -1231,63 +1370,37 @@ Group2$AgeSDEst = (Group2$AgeMax-Group2$AgeMin)/2
 
 ```
 
-Well, first of all - I'm not sure this would pass HREC in this day and age. ACL reconstruction in skeletally immature individuals is a different set of ethical considerations to adults and I'm not sure that would pass muster in the present environment. Considering the narrowness of the inclusion critera, adding in immature patients into the sample is an interesting choice. The inclusion of paediatric patients also raises issues for the validity of the PROMs included in the outcomes (see CONSORT 6).
+Well, first of all - I'm not sure this would pass HREC in the present day. ACL reconstruction in skeletally immature individuals is a different set of ethical considerations to adults and I'm not sure that would pass muster in the present environment. Considering the narrowness of the inclusion criteria, adding in immature patients into the sample is an interesting choice. The inclusion of paediatric patients also raises issues for the validity of the PROMs included in the outcomes (see CONSORT 6).
+
+
+I wanted to know if the proportion of females is generalisable, so I established the female proportion in both study groups combined, compared with the New Zealand ACL Registry data in the latest report [@aclregistry2024].
 
 ```{r}
 SexCheck <- list(
-  Group1 = prop.test(Group1$FemaleCount, 90, 0.95),
+  Group1 = prop.test(Group1$FemaleCount + Group2$FemaleCount, 180, 0.95),
   NZRegistry = prop.test(8816,8816+11581,conf.level = 0.95)
 )
 ```
 
+
+```{epoxy}
+A quick GRIM check of the female proportion returns [{scrutiny::grim(as.character(SexCheck$Group1$estimate), n = 90, percent = TRUE)}] 
+```
+
+
 ```{epoxy}
 
-The proportion of females {round(SexCheck$Group1$estimate)} ({round(SexCheck$Group$conf.int[1],digits = 2)}, {round(SexCheck$Group1$conf.int[2],digits = 2)}) is pretty much in line with the NZ ACL Registry {round(SexCheck$NZRegistry$estimate,digits = 3)} ({round(SexCheck$NZRegistry$conf.int[1],digits = 2)}, {round(SexCheck$NZRegistry$conf.int[2],digits = 2)})
-
-```
-
-Comparison between groups for age as reported
-
-```{r}
-
-SexCheck$GroupCom = prop.test(
-  x = c(42,43),
-  n = c(90,90),
-  conf.level = 0.95
-)
-
-```
-
-Now let's have a look at age.
-
-```{r}
-scrutiny::grim(as.character(Group1$AgeMedian), n = 90)
-```
-
-```{r}
-scrutiny::grim(as.character(Group2$AgeMedian), n = 90)
-```
-
-Do a comparison - we have to assume the median and the means are the same in this sample.
-
-```{r}
-
-AgeCheck <- list(
-  t_stat = (Group1$AgeMedian - Group2$AgeMedian) / sqrt((Group1$AgeSDEst^2 / 90) + (Group2$AgeSDEst^2 / 90)),
-  df = (90 + 90) - 2
-)
-
-AgeCheck$p_value <- 2 * pt(-abs(AgeCheck$t_stat), AgeCheck$df)
+The proportion of females in the selected study {round(SexCheck$Group1$estimate,2)} ({round(SexCheck$Group$conf.int[1],digits = 2)}, {round(SexCheck$Group1$conf.int[2],digits = 2)}) is in line with the NZ ACL Registry {round(SexCheck$NZRegistry$estimate,digits = 2)} ({round(SexCheck$NZRegistry$conf.int[1],digits = 2)}, {round(SexCheck$NZRegistry$conf.int[2],digits = 2)})
 
 ```
 
 ```{epoxy}
 
-Using a st
+Checks for each Group for Age came out [{scrutiny::grim(as.character(Group1$AgeMedian), n = 90)}] and [{scrutiny::grim(as.character(Group2$AgeMedian), n = 90)}].
 
 ```
 
-\
+
 
 ## CONSORT \[16\] Numbers Analysed
 
