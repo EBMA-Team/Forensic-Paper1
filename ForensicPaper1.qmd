@@ -747,7 +747,7 @@ Primary and secondary outcomes were not specified in any of the trial reports. I
 +---------------------+---------------------------------------------+---------------+----------------------------------------------------------------------------+
 |                     | Instrumented Laxity                         | Binary        |                                                                            |
 +---------------------+---------------------------------------------+---------------+----------------------------------------------------------------------------+
-| Radiographic        |                                             |               |                                                                            |
+| Radiographic        | X-ray grading                               | Ordinal       | IKDC guidelines for radiographic assessment [@hefti1993]                   |
 +---------------------+---------------------------------------------+---------------+----------------------------------------------------------------------------+
 | Composite Endpoint  | *Ideal* Ouctome                             | Binary        | Combination of IKDC Grade A and no evidence of radiographic osteoarthritis |
 +---------------------+---------------------------------------------+---------------+----------------------------------------------------------------------------+
@@ -1347,7 +1347,7 @@ Group2$AgeSDEst = (Group2$AgeMax-Group2$AgeMin)/2
 
 ```
 
-Well, first of all - I'm not sure this would pass HREC in the present day. ACL reconstruction in skeletally immature individuals is a different set of ethical considerations to adults and I'm not sure that would pass muster in the present environment. Considering the narrowness of the inclusion criteria, adding in immature patients into the sample is an interesting choice. The inclusion of paediatric patients also raises issues for the validity of the PROMs included in the outcomes (see CONSORT 6).
+Well, first of all - I'm not sure this would pass HREC in the present day. ACL reconstruction in skeletally immature individuals is a different set of ethical considerations to adults and I'm not sure that would pass muster in the present environment (assuming there was genuine uncertainty in the best surgical approach). Considering the narrowness of the inclusion criteria, adding in immature patients into the sample is an interesting choice. The inclusion of paediatric patients also raises issues for the validity of the PROMs included in the outcomes (see CONSORT 6).
 
 I wanted to know if the proportion of females is generalisable, so I established the female proportion in both study groups combined, compared with the New Zealand ACL Registry data in the latest report [@aclregistry2024].
 
@@ -1368,11 +1368,6 @@ The proportion of females in the selected study {round(SexCheck$Group$estimate,2
 
 ```
 
-```{epoxy}
-
-Checks for each Group for Age came out [{scrutiny::grim(as.character(Group1$AgeMedian), n = 90)}] and [{scrutiny::grim(as.character(Group2$AgeMedian), n = 90)}].
-
-```
 
 ## CONSORT \[16\] Numbers Analysed
 
@@ -1402,115 +1397,9 @@ statcheck::checkPDF("~/Pinczewski et al 2007.pdf")
 
 This is not surprising - the results are not formatted in APA style (not unusual for the field).
 
-Next, let's see if we can replicate a selection of the p-values. Let's simulate the groups. For simplicity, I've selected the *Ideal Outcome* binary outcome. This is a composite outcome variable derived from the IKDC clinical rating and radiographic osteoarthritis grading.
+Overall, the paper reports benefits and harms for each group, but *doesnt* report the between-group effect size or its precision (confidence intervals). The PROMs are a bit trickier in terms of reporting, the IKDC and Lysholm scores are not really multidimensional, in the sense that many PROMs in this field capture responses on different *dimensions* or themes, and instead just report a total score of some sort.
 
-```{r, warning= FALSE}
-# Function to generate one dataset and run test
-simulate_test <- function(seed) {
-  set.seed(seed)
-  
-  # Generate data
-  study_data <- simstudy::genData(149) |>
-    simstudy::trtAssign(
-      nTrt = 2,
-      balanced = FALSE,
-      ratio = 74:75,
-      grpName = "GraftGrp"
-    )
-  
-  # Define and add outcome
-  study_def <- simstudy::defDataAdd(
-    varname = "IdealOutcome",
-    formula = "ifelse(GraftGrp == 1, 0.47, 0.69)",
-    dist = "binary"
-  )
-  
-  final_data <- simstudy::addColumns(study_def, study_data) |>
-    dplyr::mutate(
-      GraftGrp = forcats::as_factor(GraftGrp),
-      IdealOutcome = as.numeric(IdealOutcome)
-    )
-  
-  # Run test and extract statistics
-  test_result <- stats::wilcox.test(
-    IdealOutcome ~ GraftGrp,
-    data = final_data,
-    correct = TRUE,
-    exact = TRUE
-  )
-  
-  # Calculate effect size (difference in proportions)
-  group_props <- tapply(final_data$IdealOutcome, final_data$GraftGrp, mean)
-  effect_size <- diff(group_props)
-  
-  return(list(
-    p_value = test_result$p.value,
-    effect_size = effect_size
-  ))
-}
-
-# Run bootstrap simulation
-set.seed(2065) # For reproducibility of the simulation
-n_iterations <- 1000
-results <- data.frame(
-  p_value = numeric(n_iterations),
-  effect_size = numeric(n_iterations)
-)
-
-for(i in 1:n_iterations) {
-  sim_result <- simulate_test(seed = i)
-  results$p_value[i] <- sim_result$p_value
-  results$effect_size[i] <- sim_result$effect_size
-}
-
-# Calculate summary statistics
-summary_stats <- list(
-  mean_pvalue = mean(results$p_value),
-  p_value_95ci = confintr::ci_mean(results$p_value),
-  mean_effect = mean(results$effect_size),
-  effect_95ci = confintr::ci_mean(results$effect_size),
-  sig_results = (nrow(results |> dplyr::filter(p_value < 0.05))/1000) * 100
-)
-
-
-
-# Create histogram of effect sizes
-if (requireNamespace("ggplot2", quietly = TRUE)) {
-  ggplot2::ggplot(results, ggplot2::aes(x = effect_size)) +
-    ggplot2::geom_histogram(bins = 30, fill = "skyblue", color = "black") +
-    ggplot2::theme_minimal() +
-    ggplot2::labs(
-      title = "Distribution of Effect Sizes Across Simulations",
-      x = "Effect Size (Difference in Proportions)",
-      y = "Count"
-    )
-}
-```
-
-```{epoxy}
-
-Bootstrap Simulation Results:
-Mean p-value: {round(summary_stats$mean_pvalue, 4)}
-95% CI for p-value: {round(summary_stats$p_value_95ci$interval[1], 4)} - {round(summary_stats$p_value_95ci$interval[2], 4)}
-Mean effect size (difference in proportions):{round(summary_stats$mean_effect, 4)}
-95% CI for effect size: {round(summary_stats$effect_95ci$interval[1], 4)} - {round(summary_stats$effect_95ci$interval[2], 4)}
-Percentage of significant results: {round(summary_stats$sig_results, 1)}%
-
-```
-
-We'll check the percentages next
-
-```{r}
-jpap_3 <- tibble::tribble(
-  ~x,     ~n,
-  "32.5",  438,
-  "35.6",  455,
-  "21.7",  501,
-  "39.3",  516,
-)
-```
-
-Survival analysis - confounding by contralateral rupture (more ruptures, less chance of ipsilateral rupture)
+There are a couple of other problems with the outcomes and estimation in this paper. The first is that none of the between-group comparisons are adjusted for potential confounders, which does not necessarily address confounder bias in this context, but doesnt have an impact on test efficiency. That is, adjusted comparisons can be more statistically powerful than unadjusted. The second problem is the impact of contralateral limb ACL rupture on estimates of a number of outcomes reported. In this regard, the contralateral rupture is a *competing risk* (an event that prevents the event of interest from happening; e.g. mortality [@schuster2020]) with respect to the graft survival estimates. If a patient were to subsequently experience such a rupture event, there is a much diminished exposure to ipsilateral rerupture during the first 6-9 months of recovery, as they are laid up and gradually return to activities with inherent risk of injury. This can lead to bias (bias upward) of the hazard estimate when using Kaplan-Meier estimation for survival [@kim2007].
 
 ## CONSORT \[17a2\] Outcomes Omitted
 
@@ -1576,6 +1465,8 @@ The question that arises from the present review is the lack of equipoise in the
 
 <!--# PRO data should be interpreted in relation to clinical outcomes including survival data, where relevant -->
 
-Insert a balanced appraisal here
+*Was the original interpretation balanced?*
+
+*How should we interpret in the present context?*
 
 # References
