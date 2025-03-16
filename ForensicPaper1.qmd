@@ -627,7 +627,7 @@ One systematic review [@janssen2017] used the Cochrane library checklist for RCT
 
 Prospective controlled trial.
 
-This doesnt really have any meaning. Is it that the HS group is being compared to the PT control? Let's assume that's the case. This is really an interrupted cohort study, or an interrupted time series.
+This term is usually reserved for randomised trials, which this is not in reality. This is really an interrupted cohort study, or an interrupted time series.
 
 <!--# Come back to this later -->
 
