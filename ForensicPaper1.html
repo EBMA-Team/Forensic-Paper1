@@ -179,7 +179,11 @@ div.csl-indent {
   <li><a href="#consort-13b-losses-and-exclusions-per-group" id="toc-consort-13b-losses-and-exclusions-per-group" class="nav-link" data-scroll-target="#consort-13b-losses-and-exclusions-per-group"><span class="header-section-number">15.2</span> CONSORT [13b] Losses and Exclusions per Group</a></li>
   <li><a href="#consort-14a-recruitment-period" id="toc-consort-14a-recruitment-period" class="nav-link" data-scroll-target="#consort-14a-recruitment-period"><span class="header-section-number">15.3</span> CONSORT [14a] Recruitment Period</a></li>
   <li><a href="#consort-14b-trial-termination" id="toc-consort-14b-trial-termination" class="nav-link" data-scroll-target="#consort-14b-trial-termination"><span class="header-section-number">15.4</span> CONSORT [14b] Trial Termination</a></li>
-  <li><a href="#consort-15-baseline-data" id="toc-consort-15-baseline-data" class="nav-link" data-scroll-target="#consort-15-baseline-data"><span class="header-section-number">15.5</span> CONSORT [15] Baseline Data</a></li>
+  <li><a href="#consort-15-baseline-data" id="toc-consort-15-baseline-data" class="nav-link" data-scroll-target="#consort-15-baseline-data"><span class="header-section-number">15.5</span> CONSORT [15] Baseline Data</a>
+  <ul class="collapse">
+  <li><a href="#age" id="toc-age" class="nav-link" data-scroll-target="#age"><span class="header-section-number">15.5.1</span> Age</a></li>
+  <li><a href="#sex" id="toc-sex" class="nav-link" data-scroll-target="#sex"><span class="header-section-number">15.5.2</span> Sex</a></li>
+  </ul></li>
   <li><a href="#consort-16-numbers-analysed" id="toc-consort-16-numbers-analysed" class="nav-link" data-scroll-target="#consort-16-numbers-analysed"><span class="header-section-number">15.6</span> CONSORT [16] Numbers Analysed</a></li>
   <li><a href="#consort-17a1-outcomes-and-estimation" id="toc-consort-17a1-outcomes-and-estimation" class="nav-link" data-scroll-target="#consort-17a1-outcomes-and-estimation"><span class="header-section-number">15.7</span> CONSORT [17a1] Outcomes and Estimation</a></li>
   <li><a href="#consort-17a2-outcomes-omitted" id="toc-consort-17a2-outcomes-omitted" class="nav-link" data-scroll-target="#consort-17a2-outcomes-omitted"><span class="header-section-number">15.8</span> CONSORT [17a2] Outcomes Omitted</a></li>
@@ -239,7 +243,7 @@ div.csl-indent {
 
 <section id="analysis-preamble" class="level1" data-number="1">
 <h1 data-number="1"><span class="header-section-number">1</span> Analysis Preamble</h1>
-<p>This analysis acts as a training activity to apply techniques described in <a href="https://jamesheathers.curve.space/">Heathers 2024</a>.</p>
+<p>This analysis acts as a training activity to apply techniques described in <span class="citation" data-cites="heathers2025">(<a href="#ref-heathers2025" role="doc-biblioref">Heathers 2025</a>)</span>.</p>
 <p>I will extend this approach, by encapsulating a review within the contemporary reporting guidelines for the trial reported in the paper in question.</p>
 <p>The analysis was conducted in RStudio IDE (RStudio 2024.12.0+467 “Kousa Dogwood” Release) using <em>Rbase</em> <span class="citation" data-cites="base">(<a href="#ref-base" role="doc-biblioref">2024a</a>)</span>, <em>quarto</em> <span class="citation" data-cites="quarto">(<a href="#ref-quarto" role="doc-biblioref">Allaire and Dervieux 2024</a>)</span> and attached packages.</p>
 <section id="my-conflicts-up-front" class="level2" data-number="1.1">
@@ -264,64 +268,65 @@ div.csl-indent {
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">require</span>(<span class="st">"pacman"</span>)) <span class="fu">install.packages</span>(<span class="st">"pacman"</span>)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>pacman<span class="sc">::</span><span class="fu">p_load</span>(</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"scrutiny"</span>,</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"pwrss"</span>,</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"parallel"</span>,</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"progressr"</span>,</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"stringdist"</span>,</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"simsurv"</span>,</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">"powerSurvEpi"</span>,</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">"wmwpow"</span>,</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">"pwrss"</span>,</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">"confintr"</span>,</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">"simstudy"</span>,</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">"statcheck"</span>,</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">"gert"</span>,</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">"rcrossref"</span>,</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="st">"httr"</span>,</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="st">"jsonlite"</span>,</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="st">"synthesisr"</span>,</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="st">"reshape"</span>,</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  <span class="st">"future"</span>,</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="st">"furrr"</span>,</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="st">"memoise"</span>,</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  <span class="st">"googlesheets4"</span>,</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="st">"openxlsx2"</span>,</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  <span class="st">"readr"</span>,</span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  <span class="st">"purrr"</span>,</span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  <span class="st">"tidyverse"</span>,</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  <span class="st">"tidymodels"</span>,</span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  <span class="st">"tidytext"</span>,</span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>  <span class="st">"stopwords"</span>,</span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>  <span class="st">"tictoc"</span>,</span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>  <span class="st">"lubridate"</span>,</span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>  <span class="st">"forcats"</span>,</span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>  <span class="st">"gt"</span>,</span>
-<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>  <span class="st">"consort"</span>,</span>
-<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>  <span class="st">"gtsummary"</span>,</span>
-<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>  <span class="st">"flextable"</span>,</span>
-<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>  <span class="st">"survival"</span>,</span>
-<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>  <span class="st">"ggplot2"</span>,</span>
-<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>  <span class="st">"ggdist"</span>,</span>
-<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>  <span class="st">"ggsurvfit"</span>,</span>
-<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>  <span class="st">"ggfortify"</span>,</span>
-<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>  <span class="st">"mice"</span>,</span>
-<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>  <span class="st">"marginaleffects"</span>,</span>
-<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>  <span class="st">"patchwork"</span>,</span>
-<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>  <span class="st">"naniar"</span>,</span>
-<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>  <span class="st">"quantreg"</span>,</span>
-<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>  <span class="st">"broom"</span>,</span>
-<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>  <span class="st">"broom.helpers"</span>,</span>
-<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>  <span class="st">"labelled"</span>,</span>
-<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>  <span class="st">"epoxy"</span>,</span>
-<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>  <span class="st">"broom.mixed"</span>,</span>
-<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>  <span class="st">"lme4"</span>,</span>
-<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>  <span class="st">"janitor"</span>,</span>
-<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>  <span class="st">"progressr"</span>,</span>
-<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>  <span class="st">"DT"</span>,</span>
-<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>  <span class="at">install =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>  <span class="at">update =</span> <span class="cn">FALSE</span></span>
-<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"rsprite2"</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"scrutiny"</span>,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"pwrss"</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"parallel"</span>,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"progressr"</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"stringdist"</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">"simsurv"</span>,</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">"powerSurvEpi"</span>,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">"wmwpow"</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">"pwrss"</span>,</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">"confintr"</span>,</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">"simstudy"</span>,</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">"statcheck"</span>,</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">"gert"</span>,</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="st">"rcrossref"</span>,</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="st">"httr"</span>,</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="st">"jsonlite"</span>,</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="st">"synthesisr"</span>,</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  <span class="st">"reshape"</span>,</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="st">"future"</span>,</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="st">"furrr"</span>,</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  <span class="st">"memoise"</span>,</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  <span class="st">"googlesheets4"</span>,</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>  <span class="st">"openxlsx2"</span>,</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  <span class="st">"readr"</span>,</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  <span class="st">"purrr"</span>,</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  <span class="st">"tidyverse"</span>,</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  <span class="st">"tidymodels"</span>,</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>  <span class="st">"tidytext"</span>,</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>  <span class="st">"stopwords"</span>,</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>  <span class="st">"tictoc"</span>,</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>  <span class="st">"lubridate"</span>,</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>  <span class="st">"forcats"</span>,</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>  <span class="st">"gt"</span>,</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>  <span class="st">"consort"</span>,</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>  <span class="st">"gtsummary"</span>,</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>  <span class="st">"flextable"</span>,</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>  <span class="st">"survival"</span>,</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>  <span class="st">"ggplot2"</span>,</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>  <span class="st">"ggdist"</span>,</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>  <span class="st">"ggsurvfit"</span>,</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>  <span class="st">"ggfortify"</span>,</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>  <span class="st">"mice"</span>,</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>  <span class="st">"marginaleffects"</span>,</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>  <span class="st">"patchwork"</span>,</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>  <span class="st">"naniar"</span>,</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>  <span class="st">"quantreg"</span>,</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>  <span class="st">"broom"</span>,</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>  <span class="st">"broom.helpers"</span>,</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>  <span class="st">"labelled"</span>,</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>  <span class="st">"epoxy"</span>,</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>  <span class="st">"broom.mixed"</span>,</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>  <span class="st">"lme4"</span>,</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>  <span class="st">"janitor"</span>,</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>  <span class="st">"progressr"</span>,</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>  <span class="st">"DT"</span>,</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>  <span class="at">install =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>  <span class="at">update =</span> <span class="cn">FALSE</span></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Cloned the RW git repo to the environment to bounce off later.</p>
@@ -686,23 +691,23 @@ div.csl-indent {
 <span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">knit_print</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<div id="sribaianps" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#sribaianps table {
+<div id="cqhghzcnuv" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#cqhghzcnuv table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#sribaianps thead, #sribaianps tbody, #sribaianps tfoot, #sribaianps tr, #sribaianps td, #sribaianps th {
+#cqhghzcnuv thead, #cqhghzcnuv tbody, #cqhghzcnuv tfoot, #cqhghzcnuv tr, #cqhghzcnuv td, #cqhghzcnuv th {
   border-style: none;
 }
 
-#sribaianps p {
+#cqhghzcnuv p {
   margin: 0;
   padding: 0;
 }
 
-#sribaianps .gt_table {
+#cqhghzcnuv .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -728,12 +733,12 @@ div.csl-indent {
   border-left-color: #D3D3D3;
 }
 
-#sribaianps .gt_caption {
+#cqhghzcnuv .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
 
-#sribaianps .gt_title {
+#cqhghzcnuv .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -745,7 +750,7 @@ div.csl-indent {
   border-bottom-width: 0;
 }
 
-#sribaianps .gt_subtitle {
+#cqhghzcnuv .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -757,7 +762,7 @@ div.csl-indent {
   border-top-width: 0;
 }
 
-#sribaianps .gt_heading {
+#cqhghzcnuv .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -769,13 +774,13 @@ div.csl-indent {
   border-right-color: #D3D3D3;
 }
 
-#sribaianps .gt_bottom_border {
+#cqhghzcnuv .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
 
-#sribaianps .gt_col_headings {
+#cqhghzcnuv .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -790,7 +795,7 @@ div.csl-indent {
   border-right-color: #D3D3D3;
 }
 
-#sribaianps .gt_col_heading {
+#cqhghzcnuv .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -810,7 +815,7 @@ div.csl-indent {
   overflow-x: hidden;
 }
 
-#sribaianps .gt_column_spanner_outer {
+#cqhghzcnuv .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -822,15 +827,15 @@ div.csl-indent {
   padding-right: 4px;
 }
 
-#sribaianps .gt_column_spanner_outer:first-child {
+#cqhghzcnuv .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
 
-#sribaianps .gt_column_spanner_outer:last-child {
+#cqhghzcnuv .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
 
-#sribaianps .gt_column_spanner {
+#cqhghzcnuv .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -842,11 +847,11 @@ div.csl-indent {
   width: 100%;
 }
 
-#sribaianps .gt_spanner_row {
+#cqhghzcnuv .gt_spanner_row {
   border-bottom-style: hidden;
 }
 
-#sribaianps .gt_group_heading {
+#cqhghzcnuv .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -872,7 +877,7 @@ div.csl-indent {
   text-align: left;
 }
 
-#sribaianps .gt_empty_group_heading {
+#cqhghzcnuv .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -887,15 +892,15 @@ div.csl-indent {
   vertical-align: middle;
 }
 
-#sribaianps .gt_from_md > :first-child {
+#cqhghzcnuv .gt_from_md > :first-child {
   margin-top: 0;
 }
 
-#sribaianps .gt_from_md > :last-child {
+#cqhghzcnuv .gt_from_md > :last-child {
   margin-bottom: 0;
 }
 
-#sribaianps .gt_row {
+#cqhghzcnuv .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -914,7 +919,7 @@ div.csl-indent {
   overflow-x: hidden;
 }
 
-#sribaianps .gt_stub {
+#cqhghzcnuv .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -927,7 +932,7 @@ div.csl-indent {
   padding-right: 5px;
 }
 
-#sribaianps .gt_stub_row_group {
+#cqhghzcnuv .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -941,15 +946,15 @@ div.csl-indent {
   vertical-align: top;
 }
 
-#sribaianps .gt_row_group_first td {
+#cqhghzcnuv .gt_row_group_first td {
   border-top-width: 2px;
 }
 
-#sribaianps .gt_row_group_first th {
+#cqhghzcnuv .gt_row_group_first th {
   border-top-width: 2px;
 }
 
-#sribaianps .gt_summary_row {
+#cqhghzcnuv .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -959,16 +964,16 @@ div.csl-indent {
   padding-right: 5px;
 }
 
-#sribaianps .gt_first_summary_row {
+#cqhghzcnuv .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
 
-#sribaianps .gt_first_summary_row.thick {
+#cqhghzcnuv .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
 
-#sribaianps .gt_last_summary_row {
+#cqhghzcnuv .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -978,7 +983,7 @@ div.csl-indent {
   border-bottom-color: #D3D3D3;
 }
 
-#sribaianps .gt_grand_summary_row {
+#cqhghzcnuv .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -988,7 +993,7 @@ div.csl-indent {
   padding-right: 5px;
 }
 
-#sribaianps .gt_first_grand_summary_row {
+#cqhghzcnuv .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -998,7 +1003,7 @@ div.csl-indent {
   border-top-color: #D3D3D3;
 }
 
-#sribaianps .gt_last_grand_summary_row_top {
+#cqhghzcnuv .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -1008,11 +1013,11 @@ div.csl-indent {
   border-bottom-color: #D3D3D3;
 }
 
-#sribaianps .gt_striped {
+#cqhghzcnuv .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
 
-#sribaianps .gt_table_body {
+#cqhghzcnuv .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -1021,7 +1026,7 @@ div.csl-indent {
   border-bottom-color: #D3D3D3;
 }
 
-#sribaianps .gt_footnotes {
+#cqhghzcnuv .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1035,7 +1040,7 @@ div.csl-indent {
   border-right-color: #D3D3D3;
 }
 
-#sribaianps .gt_footnote {
+#cqhghzcnuv .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -1044,7 +1049,7 @@ div.csl-indent {
   padding-right: 5px;
 }
 
-#sribaianps .gt_sourcenotes {
+#cqhghzcnuv .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -1058,7 +1063,7 @@ div.csl-indent {
   border-right-color: #D3D3D3;
 }
 
-#sribaianps .gt_sourcenote {
+#cqhghzcnuv .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
@@ -1066,72 +1071,72 @@ div.csl-indent {
   padding-right: 5px;
 }
 
-#sribaianps .gt_left {
+#cqhghzcnuv .gt_left {
   text-align: left;
 }
 
-#sribaianps .gt_center {
+#cqhghzcnuv .gt_center {
   text-align: center;
 }
 
-#sribaianps .gt_right {
+#cqhghzcnuv .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#sribaianps .gt_font_normal {
+#cqhghzcnuv .gt_font_normal {
   font-weight: normal;
 }
 
-#sribaianps .gt_font_bold {
+#cqhghzcnuv .gt_font_bold {
   font-weight: bold;
 }
 
-#sribaianps .gt_font_italic {
+#cqhghzcnuv .gt_font_italic {
   font-style: italic;
 }
 
-#sribaianps .gt_super {
+#cqhghzcnuv .gt_super {
   font-size: 65%;
 }
 
-#sribaianps .gt_footnote_marks {
+#cqhghzcnuv .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
 
-#sribaianps .gt_asterisk {
+#cqhghzcnuv .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
 
-#sribaianps .gt_indent_1 {
+#cqhghzcnuv .gt_indent_1 {
   text-indent: 5px;
 }
 
-#sribaianps .gt_indent_2 {
+#cqhghzcnuv .gt_indent_2 {
   text-indent: 10px;
 }
 
-#sribaianps .gt_indent_3 {
+#cqhghzcnuv .gt_indent_3 {
   text-indent: 15px;
 }
 
-#sribaianps .gt_indent_4 {
+#cqhghzcnuv .gt_indent_4 {
   text-indent: 20px;
 }
 
-#sribaianps .gt_indent_5 {
+#cqhghzcnuv .gt_indent_5 {
   text-indent: 25px;
 }
 
-#sribaianps .katex-display {
+#cqhghzcnuv .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
 
-#sribaianps div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+#cqhghzcnuv div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
@@ -4466,12 +4471,13 @@ GLOBAL 0.014  1 0.91</code></pre>
 <section id="consort-12b-additional-analyses" class="level2" data-number="14.2">
 <h2 data-number="14.2" class="anchored" data-anchor-id="consort-12b-additional-analyses"><span class="header-section-number">14.2</span> CONSORT [12b] Additional Analyses</h2>
 <!--# Methods for additional analyses, such as subgroup analyses and adjusted analyses -->
-<p>No subgroup analyses or adjusted analyses were performed. <!--# Double check this --></p>
+<p>There are regression analyses reported under each of the main outcomes in the results. It is only described as “linear regression”, with no other indication of the model construction (distribution, assumptions), variable selection or effect size uncertainty as well as the statistics package used.</p>
+<p>While guidelines for reporting statistical analyses have been published subsequent to this analysis <span class="citation" data-cites="lang2014">(<a href="#ref-lang2014" role="doc-biblioref">Lang and Altman 2014</a>)</span>, with specific reference to linear regression, there is insufficient information provided to come close to replicating the findings reported.</p>
 </section>
 </section>
 <section id="results" class="level1" data-number="15">
 <h1 data-number="15"><span class="header-section-number">15</span> Results</h1>
-<p>Let’s roll through the results by section and make some notes as we go.</p>
+<p>Let’s roll through the results by section and make some notes.</p>
 <section id="consort-13a-participant-flow" class="level2" data-number="15.1">
 <h2 data-number="15.1" class="anchored" data-anchor-id="consort-13a-participant-flow"><span class="header-section-number">15.1</span> CONSORT [13a] Participant Flow</h2>
 <!--# For each group, the numbers of participants who were randomly assigned, received intended treatment, and were analysed for outcomes of benefits and harms -->
@@ -4515,7 +4521,7 @@ GLOBAL 0.014  1 0.91</code></pre>
 <table class="table">
 <thead>
 <tr class="header">
-<th>Col1</th>
+<th>Parameter</th>
 <th>PT</th>
 <th>HT</th>
 </tr>
@@ -4543,35 +4549,125 @@ GLOBAL 0.014  1 0.91</code></pre>
 </tr>
 </tbody>
 </table>
+<section id="age" class="level3" data-number="15.5.1">
+<h3 data-number="15.5.1" class="anchored" data-anchor-id="age"><span class="header-section-number">15.5.1</span> Age</h3>
+<p>Well, first of all - I’m not sure this would pass HREC in the present day. ACL reconstruction in skeletally immature individuals within a trial setting is a different set of ethical considerations to adults and I’m not sure a mixed sample like this would pass muster in the present environment (assuming there was genuine uncertainty in the best surgical approach). Considering the narrowness of the inclusion criteria, adding in immature patients into the sample is an interesting choice. The inclusion of paediatric patients also raises issues for the validity of the PROMs included in the outcomes (see CONSORT 6).</p>
+<p>The other question that comes to mind is what are the chances that two groups separated by a cutoff in time, would have the exact same average age? That is difficult to answer without knowing more about the i) the underlying age distribution of the clinic population and ii) the selected samples distributions. Seeing that a median and range is reported, I assume that the data was skewed (to lower ages). The other thing I notice is that the recruitment period is slightly different between groups, so it is definitely plausible that two similarly aged groups could be derived from the practice flow.</p>
+<p>Let’s see what happens when we try to simulate a normal distribution of age in both groups. I’ll use the <em>rsprite2</em> package (v0.2.1) <span class="citation" data-cites="rsprite2">(<a href="#ref-rsprite2" role="doc-biblioref">Wallrich 2023</a>)</span> to generate plausible distributions.</p>
+<p>The first problem is that the median (50th percentile) for the either group is nowhere near the midpoint of the range 27.5 reported. So what to use as the estimated mean? Let’s first try with <span class="citation" data-cites="wan2014">(<a href="#ref-wan2014" role="doc-biblioref">Wan et al. 2014</a>)</span> equation 3 and for the SD we’ll use equation 9 from the same paper.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>Group1 <span class="ot">=</span> <span class="fu">list</span>(</span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">FemaleCount =</span> <span class="dv">42</span>,</span>
-<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">AgeMedian =</span> <span class="dv">25</span>,</span>
-<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">AgeMin =</span> <span class="dv">13</span>,</span>
-<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">AgeMax =</span> <span class="dv">42</span></span>
-<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>Group1<span class="sc">$</span>AgeSDEst <span class="ot">=</span> (Group1<span class="sc">$</span>AgeMax<span class="sc">-</span>Group1<span class="sc">$</span>AgeMin)<span class="sc">/</span><span class="dv">2</span></span>
-<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>Group2 <span class="ot">=</span> <span class="fu">list</span>(</span>
-<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">FemaleCount =</span> <span class="dv">43</span>,</span>
-<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">AgeMedian =</span> <span class="dv">24</span>,</span>
-<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">AgeMin =</span> <span class="dv">13</span>,</span>
-<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">AgeMax =</span> <span class="dv">52</span></span>
-<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a>Group2<span class="sc">$</span>AgeSDEst <span class="ot">=</span> (Group2<span class="sc">$</span>AgeMax<span class="sc">-</span>Group2<span class="sc">$</span>AgeMin)<span class="sc">/</span><span class="dv">2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>AgeMeanPT <span class="ot">&lt;-</span> (<span class="dv">13</span> <span class="sc">+</span> (<span class="dv">2</span><span class="sc">*</span><span class="dv">25</span>) <span class="sc">+</span> <span class="dv">42</span>)<span class="sc">/</span><span class="dv">4</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p>Well, first of all - I’m not sure this would pass HREC in the present day. ACL reconstruction in skeletally immature individuals is a different set of ethical considerations to adults and I’m not sure that would pass muster in the present environment (assuming there was genuine uncertainty in the best surgical approach). Considering the narrowness of the inclusion criteria, adding in immature patients into the sample is an interesting choice. The inclusion of paediatric patients also raises issues for the validity of the PROMs included in the outcomes (see CONSORT 6).</p>
-<p>I wanted to know if the proportion of females is generalisable, so I established the female proportion in both study groups combined, compared with the New Zealand ACL Registry data in the latest report <span class="citation" data-cites="aclregistry2024">(<a href="#ref-aclregistry2024" role="doc-biblioref">The ACL Registry Trust 2024</a>)</span>.</p>
+<p>The SD is a bit more complicated so I’ll need a function to implement the equation.<br>
+</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>SexCheck <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">Group =</span> <span class="fu">prop.test</span>(Group1<span class="sc">$</span>FemaleCount <span class="sc">+</span> Group2<span class="sc">$</span>FemaleCount, <span class="dv">180</span>, <span class="fl">0.95</span>),</span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">NZRegistry =</span> <span class="fu">prop.test</span>(<span class="dv">8816</span>,<span class="dv">8816</span><span class="sc">+</span><span class="dv">11581</span>,<span class="at">conf.level =</span> <span class="fl">0.95</span>)</span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>estimate_sd_from_range <span class="ot">&lt;-</span> <span class="cf">function</span>(min_val, max_val, n) {</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># min_val: minimum value (a)</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># max_val: maximum value (b)</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># n: sample size</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Calculate the range</span></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>  range_val <span class="ot">&lt;-</span> max_val <span class="sc">-</span> min_val</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Calculate the denominator using the inverse normal CDF</span></span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>  denominator <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">qnorm</span>((n <span class="sc">-</span> <span class="fl">0.375</span>) <span class="sc">/</span> (n <span class="sc">+</span> <span class="fl">0.25</span>))</span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Estimate the standard deviation</span></span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>  sd_estimate <span class="ot">&lt;-</span> range_val <span class="sc">/</span> denominator</span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(sd_estimate)</span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Example usage</span></span>
+<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a>AgeSDPT <span class="ot">&lt;-</span> <span class="fu">estimate_sd_from_range</span>(<span class="at">min_val =</span> <span class="dv">13</span>, <span class="at">max_val =</span> <span class="dv">42</span>, <span class="at">n =</span> <span class="dv">90</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<p>So now for the PT group we have an estimated mean of 26.25 and SD of 5.892.</p>
+</div>
+<p>Plugged into the <em>rsprite2</em> functions gives and error that <em>the mean is not consistent with number of observations (fails GRIM test)</em>.</p>
+<p>Taking a step back and rerunning the grim test function produces a slightly adjusted mean instead.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>rsprite2<span class="sc">::</span><span class="fu">GRIM_test</span>(</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">mean =</span> AgeMeanPT,</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_obs =</span> <span class="dv">90</span>,</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">m_prec =</span> <span class="dv">3</span>,</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">return_values =</span> <span class="cn">TRUE</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 26.244</code></pre>
+</div>
+</div>
+<p>The standard deviation needed a bit of tweaking to pass the GRIMMER test. The value that passed was 5.855.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>rsprite2<span class="sc">::</span><span class="fu">GRIMMER_test</span>(</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">mean =</span> <span class="fl">26.244</span>,</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">sd =</span> <span class="fl">5.855</span>,</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_obs =</span> <span class="dv">90</span>,</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">m_prec =</span> <span class="dv">3</span>,</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">sd_prec =</span> <span class="dv">3</span>,</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_items =</span> <span class="dv">1</span>,</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">min_val =</span> <span class="dv">13</span>,</span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">max_val =</span> <span class="dv">42</span></span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
+</div>
+</div>
+<p>PLugging the modified mean and SD back in;</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>AgeDistPT_Param <span class="ot">&lt;-</span> <span class="fu">set_parameters</span>(</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">mean =</span> <span class="fl">26.244</span>, </span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">sd =</span> <span class="fl">5.855</span>, </span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_obs =</span> <span class="dv">90</span>, </span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">min_val =</span> <span class="dv">13</span>,</span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">max_val =</span> <span class="dv">42</span></span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>AgeDistPT <span class="ot">&lt;-</span> rsprite2<span class="sc">::</span><span class="fu">find_possible_distributions</span>(</span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">parameters =</span> AgeDistPT_Param, </span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_distributions =</span> <span class="dv">10</span>, </span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">return_tibble =</span> <span class="cn">TRUE</span></span>
+<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb37-14"><a href="#cb37-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-15"><a href="#cb37-15" aria-hidden="true" tabindex="-1"></a>rsprite2<span class="sc">::</span><span class="fu">plot_distributions</span>(</span>
+<span id="cb37-16"><a href="#cb37-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">distributions =</span> AgeDistPT,</span>
+<span id="cb37-17"><a href="#cb37-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">plot_type =</span> <span class="st">"histogram"</span></span>
+<span id="cb37-18"><a href="#cb37-18" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="ForensicPaper1_files/figure-html/unnamed-chunk-36-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>So I still have questions about the age distribution as it doesnt fit the estimated parameters (no values near 40 for example, when the reported maximum is 42). I suspect the HT group will be even more deviant from the estimates as the range is wider (max out to 52). At this stage, the age distributions remain a mystery.</p>
+</section>
+<section id="sex" class="level3" data-number="15.5.2">
+<h3 data-number="15.5.2" class="anchored" data-anchor-id="sex"><span class="header-section-number">15.5.2</span> Sex</h3>
+<p>I also wanted to know if the proportion of females is generalisable, so I established the female proportion in both study groups combined (they are also the same between groups), compared with the New Zealand ACL Registry data in the latest report <span class="citation" data-cites="aclregistry2024">(<a href="#ref-aclregistry2024" role="doc-biblioref">The ACL Registry Trust 2024</a>)</span>.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>SexCheck <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">Group =</span> <span class="fu">prop.test</span>(<span class="dv">42</span> <span class="sc">+</span> <span class="dv">43</span>, <span class="dv">180</span>, <span class="fl">0.95</span>),</span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">NZRegistry =</span> <span class="fu">prop.test</span>(<span class="dv">8816</span>,<span class="dv">8816</span><span class="sc">+</span><span class="dv">11581</span>,<span class="at">conf.level =</span> <span class="fl">0.95</span>)</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="cell">
@@ -4580,6 +4676,7 @@ GLOBAL 0.014  1 0.91</code></pre>
 <div class="cell">
 <p>The proportion of females in the selected study 0.47 (0.4, 0.55) is in line with the NZ ACL Registry 0.43 (0.43, 0.44)</p>
 </div>
+</section>
 </section>
 <section id="consort-16-numbers-analysed" class="level2" data-number="15.6">
 <h2 data-number="15.6" class="anchored" data-anchor-id="consort-16-numbers-analysed"><span class="header-section-number">15.6</span> CONSORT [16] Numbers Analysed</h2>
@@ -4591,16 +4688,17 @@ GLOBAL 0.014  1 0.91</code></pre>
 <li><p>Available to return to clinic for assessment</p></li>
 </ul>
 <p>As far as is interpretable, the analysis is by original assigned groups throughout.</p>
+<p>What is of concern is the mixing of patient groups and eligibility criteria for analyses with respect to different outcomes. This has been outlined in the text of the paper and highlights varying criteria from one followup to the next (and the respective reporting) around objective and subjective outcomes for patients with ipsilateral or contralateral ligament/graft rupture. This makes tracing the numbers analysed from one paper in the series to the next extremely challenging.</p>
 </section>
 <section id="consort-17a1-outcomes-and-estimation" class="level2" data-number="15.7">
 <h2 data-number="15.7" class="anchored" data-anchor-id="consort-17a1-outcomes-and-estimation"><span class="header-section-number">15.7</span> CONSORT [17a1] Outcomes and Estimation</h2>
 <!--# For each primary and secondary outcome of benefits and harms, results for each group, and the estimated effect size and its precision (such as 95% confidence interval) -->
 <!--# For multidimensional PRO results from each domain and time point -->
-<p>Let’s try out some checks -see how far we get. Let’s use <em>statcheck</em> first, see if we can get a bite.</p>
+<p>Let’s try out some checks -see how far we get. Let’s use <em>statcheck</em> package first, see if we can get a bite.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>statcheck<span class="sc">::</span><span class="fu">checkPDF</span>(<span class="st">"~/Pinczewski et al 2007.pdf"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>statcheck<span class="sc">::</span><span class="fu">checkPDF</span>(<span class="st">"~/Pinczewski et al 2007.pdf"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>
@@ -4613,7 +4711,7 @@ statcheck did not find any results</code></pre>
 </div>
 <p>This is not surprising - the results are not formatted in APA style (not unusual for the field).</p>
 <p>Overall, the paper reports benefits and harms for each group, but <em>doesnt</em> report the between-group effect size or its precision (confidence intervals). The PROMs are a bit trickier in terms of reporting, the IKDC and Lysholm scores are not really multidimensional, in the sense that many PROMs in this field capture responses on different <em>dimensions</em> or themes, and instead just report a total score of some sort.</p>
-<p>There are a couple of other problems with the outcomes and estimation in this paper. The first is that none of the between-group comparisons are adjusted for potential confounders, which does not necessarily address confounder bias in this context, but doesnt have an impact on test efficiency. That is, adjusted comparisons can be more statistically powerful than unadjusted. The second problem is the impact of contralateral limb ACL rupture on estimates of a number of outcomes reported. In this regard, the contralateral rupture is a <em>competing risk</em> (an event that prevents the event of interest from happening; e.g.&nbsp;mortality <span class="citation" data-cites="schuster2020">(<a href="#ref-schuster2020" role="doc-biblioref">Schuster et al. 2020</a>)</span>) with respect to the graft survival estimates. If a patient were to subsequently experience such a rupture event, there is a much diminished exposure to ipsilateral rerupture during the first 6-9 months of recovery, as they are laid up and gradually return to activities with inherent risk of injury. This can lead to bias (bias upward) of the hazard estimate when using Kaplan-Meier estimation for survival <span class="citation" data-cites="kim2007">(<a href="#ref-kim2007" role="doc-biblioref">Kim 2007</a>)</span>.</p>
+<p>There are a couple of other problems with the outcomes and estimation in this paper. The first is that none of the between-group comparisons are adjusted for potential confounders, which does not necessarily address confounder bias in this context, but doesnt have an impact on test efficiency. That is, adjusted comparisons can be more statistically powerful than unadjusted. The second problem is the impact of contralateral limb ACL rupture on estimates of a number of outcomes reported. In this regard, the contralateral rupture is a <em>competing risk</em> (an event that prevents the event of interest from happening; e.g.&nbsp;mortality <span class="citation" data-cites="schuster2020">(<a href="#ref-schuster2020" role="doc-biblioref">Schuster et al. 2020</a>)</span>) with respect to the graft survival estimates. If a patient were to subsequently experience such a rupture event, there is a much diminished exposure to ipsilateral rerupture during the first 6-9 months of recovery, as they are laid up and gradually return to activities that expose the reconstructed ligament to re-injury. This can lead to bias (bias upward) of the hazard estimate when using Kaplan-Meier estimation for survival <span class="citation" data-cites="kim2007">(<a href="#ref-kim2007" role="doc-biblioref">Kim 2007</a>)</span>.</p>
 </section>
 <section id="consort-17a2-outcomes-omitted" class="level2" data-number="15.8">
 <h2 data-number="15.8" class="anchored" data-anchor-id="consort-17a2-outcomes-omitted"><span class="header-section-number">15.8</span> CONSORT [17a2] Outcomes Omitted</h2>
@@ -4669,15 +4767,53 @@ statcheck did not find any results</code></pre>
 <!--# Interpretation consistent with results, balancing benefits and harms, and considering other relevant evidence -->
 <!--# PRO data should be interpreted in relation to clinical outcomes including survival data, where relevant -->
 <p><em>Was the original interpretation balanced?</em></p>
+<ul>
+<li><p>Conflating selective recruitment for “control of variables”</p></li>
+<li><p>Overinflating the importance of non-significant findings for underpowered comparisons</p></li>
+<li><p>Describing trends in OA incidence, with no reference to population norms</p></li>
+<li><p>Relying on flawed regressions (Table 2 fallacy)</p></li>
+<li><p>Subsequent changes in surgical technique</p></li>
+<li><p>Follow up study results(?)</p></li>
+</ul>
 <p><em>How should we interpret in the present context?</em></p>
+<ul>
+<li><p>Previous authors have assessed the risk of bias in the study to be <em>questionable.</em></p></li>
+<li><p>The present review revealed</p>
+<ul>
+<li><p>Underpowered analyses</p></li>
+<li><p>Risk of Type 1 error due to multiplicity of tests - at least a few of the reported significant p-values are likely to be due to chance</p></li>
+<li><p>Unadjusted comparisons with simplistic data models</p></li>
+<li><p>Using binary comparisons in time-to-event outcomes</p></li>
+<li><p>Ignoring time-varying covariates (e.g.&nbsp;age)</p></li>
+<li><p>Ignoring competing risks in time-to-event outcomes</p></li>
+</ul></li>
+</ul>
+<p>Does it stack up in terms of how its been cited?<br>
+<br>
+Example 1: <span class="citation" data-cites="kamatsuki2024">(<a href="#ref-kamatsuki2024" role="doc-biblioref">Kamatsuki et al. 2024</a>)</span></p>
+<blockquote class="blockquote">
+<p><em>Pinczewski et al [45] reported a side-to-side difference in AP laxity of &gt;2 mm at 2 years after surgery to be associated with an increased risk for graft rupture in a 10-year follow-up study after ACL reconstructions.</em></p>
+</blockquote>
+<p>Well let’s unpack that a little bit. This finding was reported from a poorly described linear regression, with a risk of Table 2 fallacy. For those unfamiliar, this fallacy is where effect estimates (usually presented in a regression summary making up Table 2 of a clinical research paper) are misinterpreted to be of the same type (direct versus indirect) when relaying coefficients <span class="citation" data-cites="westreich2013">(<a href="#ref-westreich2013" role="doc-biblioref">Westreich and Greenland 2013</a>)</span>. Full disclosure here, this is a mistake we have all made at some point in this domain, but it is relevant here when assessing the appropriateness of key papers.</p>
+<p>Example 2: <span class="citation" data-cites="khan2024">(<a href="#ref-khan2024" role="doc-biblioref">Khan et al. 2024</a>)</span></p>
+<blockquote class="blockquote">
+<p><em>the available literature suggests a higher contralateral tear rate with BPTB autografts relative to HST autografts [13-<strong>15</strong>].</em></p>
+</blockquote>
+<p>This finding is referenced from a binary comparison between graft groups that is not well described in the text of the paper. It is unclear what denominator has been used in the calculation (N = 90?). The issues with using binary classification in time-to-event outcomes, has been discussed elsewhere <span class="citation" data-cites="salika2022">(<a href="#ref-salika2022" role="doc-biblioref">Salika et al. 2022</a>)</span>. Overall, ignoring censoring and in this domain, the competing risk of injury (see CONSORT 17a) to either limb with respect to reinjury risk is fraught and needs to be re-examined.</p>
+<p>Example 3: <span class="citation" data-cites="widhalm2024">(<a href="#ref-widhalm2024" role="doc-biblioref">Widhalm et al. 2024</a>)</span></p>
+<blockquote class="blockquote">
+<p><em>Since the objective result measurements of ROM and stability do not necessarily correspond to the subjective functionality of a knee joint after cruciate ligament reconstruction [40], the subjective outcome was evaluated by using four standardized questionnaires frequently used in studies: the International Knee Documentation Committee Subjective Knee Form (IKDC) [19,40,<strong>41</strong>],</em></p>
+</blockquote>
+<p>This example is frustratingly common in the literature - speaking from experience, it is incredibly easy to identify a paper that shares the name of the scale you think you want to use and it turns out to be i) a different version of the same scale created by the original developers, ii) an iteration or refinement by a different group or iii) not the same scale at all, just mislabelled or shares elements of the name. Unfortunately for this citing paper, the IKDC they are referring to is the IKDC2000, which is not the same questionnaire used in the article of interest (although the subjective questions are similar).</p>
 </section>
 </section>
-<section id="references" class="level1 unnumbered" data-number="17">
-
+<section id="references" class="level1" data-number="17">
+<h1 data-number="17"><span class="header-section-number">17</span> References</h1>
+<p>Literature and package usage</p>
 
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">17 References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-epoxy" class="csl-entry" role="listitem">
 Aden-Buie, Garrick. 2023. <span>“Epoxy: String Interpolation for Documents, Reports and Apps.”</span> <a href="https://CRAN.R-project.org/package=epoxy">https://CRAN.R-project.org/package=epoxy</a>.
 </div>
@@ -4717,6 +4853,9 @@ Fabricant, Peter D., Christopher M. Brusalis, Jonathan M. Schachne, Matthew J. M
 <div id="ref-haddaway2022" class="csl-entry" role="listitem">
 Haddaway, Neal R., Matthew J. Grainger, and Charles T. Gray. 2022. <span>“Citationchaser: A Tool for Transparent and Efficient Forward and Backward Citation Chasing in Systematic Searching.”</span> <em>Research Synthesis Methods</em> 13 (4): 533–45. <a href="https://doi.org/10.1002/jrsm.1563">https://doi.org/10.1002/jrsm.1563</a>.
 </div>
+<div id="ref-heathers2025" class="csl-entry" role="listitem">
+Heathers, James. 2025. <span>“An Introduction to Forensic Metascience,”</span> February. <a href="https://doi.org/10.5281/ZENODO.14871843">https://doi.org/10.5281/ZENODO.14871843</a>.
+</div>
 <div id="ref-hefti1993" class="csl-entry" role="listitem">
 Hefti, E., W. Müller, R. P. Jakob, and H. -U. Stäubli. 1993. <span>“Evaluation of Knee Ligament Injuries with the IKDC Form.”</span> <em>Knee Surgery, Sports Traumatology, Arthroscopy</em> 1 (3-4): 226–34. <a href="https://doi.org/10.1007/bf01560215">https://doi.org/10.1007/bf01560215</a>.
 </div>
@@ -4732,11 +4871,20 @@ Janssen, Rob PA, Nicky van Melick, Jan BA van Mourik, Max Reijman, and Lodewijk 
 <div id="ref-junqueira2023" class="csl-entry" role="listitem">
 Junqueira, Daniela R, Liliane Zorzela, Susan Golder, Yoon Loke, Joel J Gagnier, Steven A Julious, Tianjing Li, et al. 2023. <span>“CONSORT Harms 2022 Statement, Explanation, and Elaboration: Updated Guideline for the Reporting of Harms in Randomised Trials.”</span> <em>BMJ</em>, April, e073725. <a href="https://doi.org/10.1136/bmj-2022-073725">https://doi.org/10.1136/bmj-2022-073725</a>.
 </div>
+<div id="ref-kamatsuki2024" class="csl-entry" role="listitem">
+Kamatsuki, Yusuke, Marie Synnøve Qvale, Kathrin Steffen, Arnlaug Wangensteen, and Tron Krosshaug. 2024. <span>“Anatomic Risk Factors for Initial and Secondary Noncontact Anterior Cruciate Ligament Injury: A Prospective Cohort Study in 880 Female Elite Handball and Soccer Players.”</span> <em>The American Journal of Sports Medicine</em> 53 (1): 123–31. <a href="https://doi.org/10.1177/03635465241292755">https://doi.org/10.1177/03635465241292755</a>.
+</div>
+<div id="ref-khan2024" class="csl-entry" role="listitem">
+Khan, Mohammed Inayathulla, Inas Ismail, Savith Shetty, Jithin A Jebbar, Afra Faiaz, Shameez Mohammed, Abhishek V Shetty, Imthiaz Ahammed, and Mohammed Shahid. 2024. <span>“Functional Outcomes of Bone-Patellar Tendon-Bone Versus Quadrupled Semitendinosus and Gracilis Autografts for Anterior Cruciate Ligament Reconstruction.”</span> <em>Cureus</em>, August. <a href="https://doi.org/10.7759/cureus.66945">https://doi.org/10.7759/cureus.66945</a>.
+</div>
 <div id="ref-kilicoglu2019" class="csl-entry" role="listitem">
 Kilicoglu, Halil, Zeshan Peng, Shabnam Tafreshi, Tung Tran, Graciela Rosemblat, and Jodi Schneider. 2019. <span>“Confirm or Refute?: A Comparative Study on Citation Sentiment Classification in Clinical Research Publications.”</span> <em>Journal of Biomedical Informatics</em> 91 (March): 103123. <a href="https://doi.org/10.1016/j.jbi.2019.103123">https://doi.org/10.1016/j.jbi.2019.103123</a>.
 </div>
 <div id="ref-kim2007" class="csl-entry" role="listitem">
 Kim, Haesook T. 2007. <span>“Cumulative Incidence in Competing Risks Data and Competing Risks Regression Analysis.”</span> <em>Clinical Cancer Research</em> 13 (2): 559–65. <a href="https://doi.org/10.1158/1078-0432.ccr-06-1210">https://doi.org/10.1158/1078-0432.ccr-06-1210</a>.
+</div>
+<div id="ref-lang2014" class="csl-entry" role="listitem">
+Lang, Thomas A., and Douglas G. Altman. 2014. <span>“Statistical Analyses and Methods in the Published Literature: The SAMPL Guidelines*.”</span> <em>Guidelines for Reporting Health Research: A User’s Manual</em>, July, 264–74. <a href="https://doi.org/10.1002/9781118715598.ch25">https://doi.org/10.1002/9781118715598.ch25</a>.
 </div>
 <div id="ref-stringdist" class="csl-entry" role="listitem">
 Loo, M. P. J. van der. 2014. <span>“The Stringdist Package for Approximate String Matching”</span> 6: 111–22. <a href="https://CRAN.R-project.org/package=stringdist">https://CRAN.R-project.org/package=stringdist</a>.
@@ -4786,6 +4934,9 @@ Rothman, K. J., J. E. Gallacher, and E. E. Hatch. 2013. <span>“Why Representat
 <div id="ref-rousseau2019" class="csl-entry" role="listitem">
 Rousseau, Romain, Charlotte Labruyere, Charles Kajetanek, Olivia Deschamps, Konstantinos G. Makridis, and Patrick Djian. 2019. <span>“Complications After Anterior Cruciate Ligament Reconstruction and Their Relation to the Type of Graft: A Prospective Study of 958 Cases.”</span> <em>The American Journal of Sports Medicine</em> 47 (11): 2543–49. <a href="https://doi.org/10.1177/0363546519867913">https://doi.org/10.1177/0363546519867913</a>.
 </div>
+<div id="ref-salika2022" class="csl-entry" role="listitem">
+Salika, Theodosia, Rebecca M. Turner, David Fisher, Jayne F. Tierney, and Ian R. White. 2022. <span>“Implications of Analysing Time-to-Event Outcomes as Binary in Meta-Analysis: Empirical Evidence from the Cochrane Database of Systematic Reviews.”</span> <em>BMC Medical Research Methodology</em> 22 (1). <a href="https://doi.org/10.1186/s12874-022-01541-9">https://doi.org/10.1186/s12874-022-01541-9</a>.
+</div>
 <div id="ref-consort2010" class="csl-entry" role="listitem">
 Schulz, Kenneth F, Douglas G Altman, and David Moher. 2010. <span>“CONSORT 2010 Statement: Updated Guidelines for Reporting Parallel Group Randomised Trials.”</span> <em>BMC Medicine</em> 8 (1). <a href="https://doi.org/10.1186/1741-7015-8-18">https://doi.org/10.1186/1741-7015-8-18</a>.
 </div>
@@ -4813,8 +4964,17 @@ Therneau, Terry M. 2024. <span>“A Package for Survival Analysis in r.”</span
 <div id="ref-furrr" class="csl-entry" role="listitem">
 Vaughan, Davis, and Matt Dancho. 2022. <span>“Furrr: Apply Mapping Functions in Parallel Using Futures.”</span> <a href="https://CRAN.R-project.org/package=furrr">https://CRAN.R-project.org/package=furrr</a>.
 </div>
+<div id="ref-rsprite2" class="csl-entry" role="listitem">
+Wallrich, Lukas. 2023. <span>“Rsprite2: Identify Distributions That Match Reported Sample Parameters (SPRITE).”</span> <a href="https://CRAN.R-project.org/package=rsprite2">https://CRAN.R-project.org/package=rsprite2</a>.
+</div>
+<div id="ref-wan2014" class="csl-entry" role="listitem">
+Wan, Xiang, Wenqian Wang, Jiming Liu, and Tiejun Tong. 2014. <span>“Estimating the Sample Mean and Standard Deviation from the Sample Size, Median, Range and/or Interquartile Range.”</span> <em>BMC Medical Research Methodology</em> 14 (1). <a href="https://doi.org/10.1186/1471-2288-14-135">https://doi.org/10.1186/1471-2288-14-135</a>.
+</div>
 <div id="ref-synthesisr" class="csl-entry" role="listitem">
 Westgate, Martin, and Eliza Grames. 2020. <span>“Synthesisr: Import, Assemble, and Deduplicate Bibliographic Datasets.”</span> <a href="https://CRAN.R-project.org/package=synthesisr">https://CRAN.R-project.org/package=synthesisr</a>.
+</div>
+<div id="ref-westreich2013" class="csl-entry" role="listitem">
+Westreich, D., and S. Greenland. 2013. <span>“The Table 2 Fallacy: Presenting and Interpreting Confounder and Modifier Coefficients.”</span> <em>American Journal of Epidemiology</em> 177 (4): 292–98. <a href="https://doi.org/10.1093/aje/kws412">https://doi.org/10.1093/aje/kws412</a>.
 </div>
 <div id="ref-stringr" class="csl-entry" role="listitem">
 Wickham, Hadley. 2023. <span>“Stringr: Simple, Consistent Wrappers for Common String Operations.”</span> <a href="https://CRAN.R-project.org/package=stringr">https://CRAN.R-project.org/package=stringr</a>.
@@ -4824,6 +4984,9 @@ Wickham, Hadley, Mara Averick, Jennifer Bryan, Winston Chang, Lucy D’Agostino 
 </div>
 <div id="ref-memoise" class="csl-entry" role="listitem">
 Wickham, Hadley, Jim Hester, Winston Chang, Kirill Müller, and Daniel Cook. 2021. <span>“Memoise: ’Memoisation’ of Functions.”</span> <a href="https://CRAN.R-project.org/package=memoise">https://CRAN.R-project.org/package=memoise</a>.
+</div>
+<div id="ref-widhalm2024" class="csl-entry" role="listitem">
+Widhalm, Harald K., Alexander Draschl, Jannike Horns, Sebastian Rilk, Johannes Leitgeb, Stefan Hajdu, and Patrick Sadoghi. 2024. <span>“The Optimal Window for Reconstruction of the Anterior Cruciate Ligament (ACL) with Respect to Quadriceps Atrophies Lies Within 21 to 100 Days.”</span> Edited by Filippo Migliorini. <em>PLOS ONE</em> 19 (2): e0296943. <a href="https://doi.org/10.1371/journal.pone.0296943">https://doi.org/10.1371/journal.pone.0296943</a>.
 </div>
 </div></section></div></main>
 <!-- /main column -->

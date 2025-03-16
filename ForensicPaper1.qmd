@@ -23,7 +23,7 @@ bibliography: ForensicPapers.bib
 
 # Analysis Preamble
 
-This analysis acts as a training activity to apply techniques described in [Heathers 2024](https://jamesheathers.curve.space/).
+This analysis acts as a training activity to apply techniques described in [@heathers2025].
 
 I will extend this approach, by encapsulating a review within the contemporary reporting guidelines for the trial reported in the paper in question.
 
@@ -49,6 +49,7 @@ Load up required packages in advance using *pacman* package (v`{r} utils::packag
 
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(
+  "rsprite2",
   "scrutiny",
   "pwrss",
   "parallel",
@@ -182,7 +183,7 @@ It has been cited 288 times (pubmed) or 524 times (crossref), depending on which
 
 ## Summary
 
-You can review the abstract for this paper [here](https://journals.sagepub.com/doi/10.1177/0363546506296042). In brief, this was an attempted RCT comparing two ways of reconstructing the anterior cruciate ligament in patients participating in high levels of competitive sport at the time of injury. The target paper is the 10-year follow up of the comparison between groups, with previous reports at 2, 5 and 7 year follow ups (see Trial Protocol).
+You can review the abstract for this paper [here](https://journals.sagepub.com/doi/10.1177/0363546506296042). In brief, this was an attempted RCT comparing two sources of graft material forreconstructing the anterior cruciate ligament in patients participating in high levels of competitive sport at the time of injury. The selected citation is the 10-year follow up of the comparison between groups, with previous reports at 2, 5 and 7 year follow ups (see Trial Protocol).
 
 # Bibliometric Analysis
 
@@ -1258,11 +1259,13 @@ Data assumption was non-parametric. <!--# Come back to this -->
 
 <!--# Methods for additional analyses, such as subgroup analyses and adjusted analyses -->
 
-No subgroup analyses or adjusted analyses were performed. <!--# Double check this -->
+There are regression analyses reported under each of the main outcomes in the results. It is only described as "linear regression", with no other indication of the model construction (distribution, assumptions), variable selection or effect size uncertainty as well as the statistics package used.
+
+While guidelines for reporting statistical analyses have been published subsequent to this analysis [@lang2014], with specific reference to linear regression, there is insufficient information provided to come close to replicating the findings reported.
 
 # Results
 
-Let's roll through the results by section and make some notes as we go.
+Let's roll through the results by section and make some notes.
 
 ## CONSORT \[13a\] Participant Flow
 
@@ -1320,40 +1323,129 @@ No baseline PRO data was collected for this study.
 
 Now let's do a few checks on the demographics, starting with a quick rehash of the key data reported in the paper.
 
-| Col1            | PT  | HT  |
+| Parameter       | PT  | HT  |
 |-----------------|-----|-----|
 | Females (Count) | 42  | 43  |
 | Age (Median)    | 25  | 24  |
 | Age (Min)       | 13  | 13  |
 | Age (Max)       | 42  | 52  |
 
-```{r}
-Group1 = list(
-  FemaleCount = 42,
-  AgeMedian = 25,
-  AgeMin = 13,
-  AgeMax = 42
-)
-Group1$AgeSDEst = (Group1$AgeMax-Group1$AgeMin)/2
+### Age
 
-Group2 = list(
-  FemaleCount = 43,
-  AgeMedian = 24,
-  AgeMin = 13,
-  AgeMax = 52
-)
-Group2$AgeSDEst = (Group2$AgeMax-Group2$AgeMin)/2
+Well, first of all - I'm not sure this would pass HREC in the present day. ACL reconstruction in skeletally immature individuals within a trial setting is a different set of ethical considerations to adults and I'm not sure a mixed sample like this would pass muster in the present environment (assuming there was genuine uncertainty in the best surgical approach). Considering the narrowness of the inclusion criteria, adding in immature patients into the sample is an interesting choice. The inclusion of paediatric patients also raises issues for the validity of the PROMs included in the outcomes (see CONSORT 6).
+
+The other question that comes to mind is what are the chances that two groups separated by a cutoff in time, would have the exact same average age? That is difficult to answer without knowing more about the i) the underlying age distribution of the clinic population and ii) the selected samples distributions. Seeing that a median and range is reported, I assume that the data was skewed (to lower ages). The other thing I notice is that the recruitment period is slightly different between groups, so it is definitely plausible that two similarly aged groups could be derived from the practice flow.
+
+Let's see what happens when we try to simulate a normal distribution of age in both groups. I'll use the *rsprite2* package (v`{r} utils::packageVersion("rsprite2")`) [@rsprite2] to generate plausible distributions.
+
+The first problem is that the median (50th percentile) for the either group is nowhere near the midpoint of the range `{r} 13 + ((42-13)/2)` reported. So what to use as the estimated mean? Let's first try with [@wan2014] equation 3 and for the SD we'll use equation 9 from the same paper.
+
+```{r}
+
+AgeMeanPT <- (13 + (2*25) + 42)/4
+
+```
+
+The SD is a bit more complicated so I'll need a function to implement the equation.\
+
+```{r}
+estimate_sd_from_range <- function(min_val, max_val, n) {
+  # min_val: minimum value (a)
+  # max_val: maximum value (b)
+  # n: sample size
+  
+  # Calculate the range
+  range_val <- max_val - min_val
+  
+  # Calculate the denominator using the inverse normal CDF
+  denominator <- 2 * qnorm((n - 0.375) / (n + 0.25))
+  
+  # Estimate the standard deviation
+  sd_estimate <- range_val / denominator
+  
+  return(sd_estimate)
+}
+
+# Example usage
+AgeSDPT <- estimate_sd_from_range(min_val = 13, max_val = 42, n = 90)
+```
+
+```{epoxy}
+
+So now for the PT group we have an estimated mean of {round(AgeMeanPT,3)} and SD of {round(AgeSDPT,3)}.
+
+```
+
+Plugged into the *rsprite2* functions gives and error that *the mean is not consistent with number of observations (fails GRIM test)*.
+
+```{r}
 
 
 ```
 
-Well, first of all - I'm not sure this would pass HREC in the present day. ACL reconstruction in skeletally immature individuals is a different set of ethical considerations to adults and I'm not sure that would pass muster in the present environment (assuming there was genuine uncertainty in the best surgical approach). Considering the narrowness of the inclusion criteria, adding in immature patients into the sample is an interesting choice. The inclusion of paediatric patients also raises issues for the validity of the PROMs included in the outcomes (see CONSORT 6).
+Taking a step back and rerunning the grim test function produces a slightly adjusted mean instead.
 
-I wanted to know if the proportion of females is generalisable, so I established the female proportion in both study groups combined, compared with the New Zealand ACL Registry data in the latest report [@aclregistry2024].
+```{r}
+
+rsprite2::GRIM_test(
+  mean = AgeMeanPT,
+  n_obs = 90,
+  m_prec = 3,
+  return_values = TRUE
+)
+
+```
+
+The standard deviation needed a bit of tweaking to pass the GRIMMER test. The value that passed was 5.855.
+
+```{r}
+rsprite2::GRIMMER_test(
+  mean = 26.244,
+  sd = 5.855,
+  n_obs = 90,
+  m_prec = 3,
+  sd_prec = 3,
+  n_items = 1,
+  min_val = 13,
+  max_val = 42
+)
+```
+
+PLugging the modified mean and SD back in;
+
+```{r}
+
+
+AgeDistPT_Param <- set_parameters(
+  mean = 26.244, 
+  sd = 5.855, 
+  n_obs = 90, 
+  min_val = 13,
+  max_val = 42
+  )
+
+AgeDistPT <- rsprite2::find_possible_distributions(
+  parameters = AgeDistPT_Param, 
+  n_distributions = 10, 
+  return_tibble = TRUE
+  )
+
+rsprite2::plot_distributions(
+  distributions = AgeDistPT,
+  plot_type = "histogram"
+  )
+
+```
+
+So I still have questions about the age distribution as it doesnt fit the estimated parameters (no values near 40 for example, when the reported maximum is 42). I suspect the HT group will be even more deviant from the estimates as the range is wider (max out to 52). At this stage, the age distributions remain a mystery.
+
+### Sex
+
+I also wanted to know if the proportion of females is generalisable, so I established the female proportion in both study groups combined (they are also the same between groups), compared with the New Zealand ACL Registry data in the latest report [@aclregistry2024].
 
 ```{r}
 SexCheck <- list(
-  Group = prop.test(Group1$FemaleCount + Group2$FemaleCount, 180, 0.95),
+  Group = prop.test(42 + 43, 180, 0.95),
   NZRegistry = prop.test(8816,8816+11581,conf.level = 0.95)
 )
 ```
@@ -1367,7 +1459,6 @@ A quick GRIM check of the female proportion returns [{scrutiny::grim(as.characte
 The proportion of females in the selected study {round(SexCheck$Group$estimate,2)} ({round(SexCheck$Group$conf.int[1],2)}, {round(SexCheck$Group$conf.int[2],2)}) is in line with the NZ ACL Registry {round(SexCheck$NZRegistry$estimate,2)} ({round(SexCheck$NZRegistry$conf.int[1],2)}, {round(SexCheck$NZRegistry$conf.int[2],2)})
 
 ```
-
 
 ## CONSORT \[16\] Numbers Analysed
 
@@ -1383,13 +1474,15 @@ The numbers get tricky depending on which outcome category we are talking about 
 
 As far as is interpretable, the analysis is by original assigned groups throughout.
 
+What is of concern is the mixing of patient groups and eligibility criteria for analyses with respect to different outcomes. This has been outlined in the text of the paper and highlights varying criteria from one followup to the next (and the respective reporting) around objective and subjective outcomes for patients with ipsilateral or contralateral ligament/graft rupture. This makes tracing the numbers analysed from one paper in the series to the next extremely challenging.
+
 ## CONSORT \[17a1\] Outcomes and Estimation
 
 <!--# For each primary and secondary outcome of benefits and harms, results for each group, and the estimated effect size and its precision (such as 95% confidence interval) -->
 
 <!--# For multidimensional PRO results from each domain and time point -->
 
-Let's try out some checks -see how far we get. Let's use *statcheck* first, see if we can get a bite.
+Let's try out some checks -see how far we get. Let's use *statcheck* package first, see if we can get a bite.
 
 ```{r}
 statcheck::checkPDF("~/Pinczewski et al 2007.pdf")
@@ -1399,13 +1492,13 @@ This is not surprising - the results are not formatted in APA style (not unusual
 
 Overall, the paper reports benefits and harms for each group, but *doesnt* report the between-group effect size or its precision (confidence intervals). The PROMs are a bit trickier in terms of reporting, the IKDC and Lysholm scores are not really multidimensional, in the sense that many PROMs in this field capture responses on different *dimensions* or themes, and instead just report a total score of some sort.
 
-There are a couple of other problems with the outcomes and estimation in this paper. The first is that none of the between-group comparisons are adjusted for potential confounders, which does not necessarily address confounder bias in this context, but doesnt have an impact on test efficiency. That is, adjusted comparisons can be more statistically powerful than unadjusted. The second problem is the impact of contralateral limb ACL rupture on estimates of a number of outcomes reported. In this regard, the contralateral rupture is a *competing risk* (an event that prevents the event of interest from happening; e.g. mortality [@schuster2020]) with respect to the graft survival estimates. If a patient were to subsequently experience such a rupture event, there is a much diminished exposure to ipsilateral rerupture during the first 6-9 months of recovery, as they are laid up and gradually return to activities with inherent risk of injury. This can lead to bias (bias upward) of the hazard estimate when using Kaplan-Meier estimation for survival [@kim2007].
+There are a couple of other problems with the outcomes and estimation in this paper. The first is that none of the between-group comparisons are adjusted for potential confounders, which does not necessarily address confounder bias in this context, but does have an impact on test efficiency. I can see the reasoning here - if there are no differences in covariates between groups, then they don't meet the definition of a confounder. However, adjusted comparisons can be more statistically powerful than unadjusted. The second problem is the impact of contralateral limb ACL rupture on estimates of a number of outcomes reported. In this regard, the contralateral rupture is a *competing risk* (an event that prevents the event of interest from happening; e.g. mortality [@schuster2020]) with respect to the graft survival estimates. If a patient were to subsequently experience such a rupture event, there is a much diminished exposure to ipsilateral rerupture during the first 6-9 months of recovery, as they are laid up and gradually return to activities that expose the reconstructed ligament to re-injury. This can lead to bias (bias upward) of the hazard estimate when using Kaplan-Meier estimation for survival [@kim2007].
 
 ## CONSORT \[17a2\] Outcomes Omitted
 
 <!--# For outcomes omitted from the trial report (benefits and harms), provide rationale for not reporting and indicate where the data on omitted outcomes can be accessed -->
 
-This is a bit of a mystery. Without access to a protocol prepared prior to the first follow up report, its difficult to know what has been omitted.
+This is a bit of a mystery. Without access to a protocol prepared prior to the first follow up report, its impossible to know what has been omitted.
 
 ## CONSORT \[17b\] Binary Outcomes
 
@@ -1467,6 +1560,56 @@ The question that arises from the present review is the lack of equipoise in the
 
 *Was the original interpretation balanced?*
 
+-   Conflating selective recruitment for "control of variables"
+
+-   Overinflating the importance of non-significant findings for underpowered comparisons
+
+-   Describing trends in OA incidence, with no reference to population norms
+
+-   Relying on flawed regressions (Table 2 fallacy)
+
+-   Subsequent changes in surgical technique
+
+-   Follow up study results(?)
+
 *How should we interpret in the present context?*
 
+-   Previous authors have assessed the risk of bias in the study to be *questionable.*
+
+-   The present review revealed
+
+    -   Underpowered analyses
+
+    -   Risk of Type 1 error due to multiplicity of tests - at least a few of the reported significant p-values are likely to be due to chance
+
+    -   Unadjusted comparisons with simplistic data models
+
+    -   Using binary comparisons in time-to-event outcomes
+
+    -   Ignoring time-varying covariates (e.g. age)
+
+    -   Ignoring competing risks in time-to-event outcomes
+
+Does it stack up in terms of how its been cited?\
+\
+Example 1: [@kamatsuki2024]
+
+> *Pinczewski et al \[45\] reported a side-to-side difference in AP laxity of \>2 mm at 2 years after surgery to be associated with an increased risk for graft rupture in a 10-year follow-up study after ACL reconstructions.*
+
+Well let's unpack that a little bit. This finding was reported from a poorly described linear regression, with a risk of Table 2 fallacy. For those unfamiliar, this fallacy is where effect estimates (usually presented in a regression summary making up Table 2 of a clinical research paper) are misinterpreted to be of the same type (direct versus indirect) when relaying coefficients [@westreich2013]. Full disclosure here, this is a mistake we have all made at some point in this domain, but it is relevant here when assessing the appropriateness of key papers.
+
+Example 2: [@khan2024]
+
+> *the available literature suggests a higher contralateral tear rate with BPTB autografts relative to HST autografts \[13-**15**\].*
+
+This finding is referenced from a binary comparison between graft groups that is not well described in the text of the paper. It is unclear what denominator has been used in the calculation (N = 90?). The issues with using binary classification in time-to-event outcomes, has been discussed elsewhere [@salika2022]. Overall, ignoring censoring and in this domain, the competing risk of injury (see CONSORT 17a) to either limb with respect to reinjury risk is fraught and needs to be re-examined.
+
+Example 3: [@widhalm2024]
+
+> *Since the objective result measurements of ROM and stability do not necessarily correspond to the subjective functionality of a knee joint after cruciate ligament reconstruction \[40\], the subjective outcome was evaluated by using four standardized questionnaires frequently used in studies: the International Knee Documentation Committee Subjective Knee Form (IKDC) \[19,40,**41**\],*
+
+This example is frustratingly common in the literature - speaking from experience, it is incredibly easy to identify a paper that shares the name of the scale you think you want to use and it turns out to be i) a different version of the same scale created by the original developers, ii) an iteration or refinement by a different group or iii) not the same scale at all, just mislabelled or shares elements of the name. Unfortunately for this citing paper, the IKDC they are referring to is the IKDC2000, which is not the same questionnaire used in the article of interest (although the subjective questions are similar).
+
 # References
+
+Literature and package usage
