@@ -57,6 +57,7 @@ Load up required packages in advance using *pacman* package (v`{r} utils::packag
 
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(
+  "parallelly",
   "gargle",
   "googledrive",
   "gert",
@@ -329,9 +330,17 @@ You can see for yourself in the matches table below (maybe I missed one?).
 
 # Set up parallel processing
 setup_parallel <- function(cores = NULL) {
+  # Check for cloud environments or system limitations
+  max_allowed_cores <- parallelly::availableCores()
+  
   if (is.null(cores)) {
-    cores <- parallel::detectCores() - 1
+    # Use 1 less than available, but respect system limits
+    cores <- min(parallel::detectCores() - 1, max_allowed_cores)
+  } else {
+    # Make sure user-specified cores don't exceed limits
+    cores <- min(cores, max_allowed_cores)
   }
+  
   plan(multisession, workers = cores)
 }
 
