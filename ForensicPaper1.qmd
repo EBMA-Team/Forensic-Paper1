@@ -57,6 +57,8 @@ Load up required packages in advance using *pacman* package (v`{r} utils::packag
 
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(
+  "gargle",
+  "googledrive",
   "gert",
   "rsprite2",
   "scrutiny",
@@ -120,6 +122,30 @@ pacman::p_load(
 
 ```
 
+## Authorisations
+
+Pre-authorise access to registry datasets using the *gargle* package (v`{r} utils::packageVersion("gargle")`) [@gargle].
+
+```{r, echo = FALSE}
+
+# Set the cache location
+options(gargle_oauth_cache = ".secrets")
+
+# Use the saved token for non-interactive auth
+drive_auth(email = "cscholes@ebma.com.au", 
+          cache = ".secrets")
+```
+
+```{r, echo = FALSE}
+
+options(
+  gargle_oauth_cache = ".secrets",
+  gargle_oauth_email = TRUE
+)
+
+drive_auth(cache = ".secrets", email = TRUE)
+```
+
 Cloned the RW git repo to the environment to bounce off later.
 
 ```{r}
@@ -130,7 +156,11 @@ temp_dir <- tempdir()
 repo_path <- file.path(temp_dir, "retraction-watch-data")
 
 # Clone the repository to the temporary directory
-git_clone(url = repo_url, path = repo_path)
+git_clone(
+  url = repo_url, 
+  path = repo_path,
+  verbose = FALSE
+  )
 
 # Access files from the repository
 data_file_path <- file.path(repo_path, "retraction_watch.csv")
@@ -194,12 +224,45 @@ I retrieved the citation list for this paper from *citationchaser* (the shiny ap
 
 ```{r, warning = FALSE, echo = FALSE}
 
+# Define a temporary file location
+temp_file <- tempfile(fileext = ".bib")  # Assuming your citations are in BIB format
+                                        # Change extension if you have RIS, etc.
+
+# Find your specific file 
+citation_file <- googledrive::drive_find(
+  pattern = "Paper1Citations",  # Adjust the search pattern
+  n_max = 20
+  
+  ) 
+
+# If you found your file, download it
+if(nrow(citation_file) > 0) {
+  googledrive::drive_download(
+    file = citation_file[1,],  # Use the first match if multiple found
+    path = temp_file,
+    overwrite = TRUE
+  )
+} else {
+  print("File not found. Check name or permissions.")
+}
+
+```
+
+```{r}
+
+# Read the citations using synthesisr from the temporary file
 Citations <- synthesisr::read_refs(
-  filename = "C:/Users/cscho//Documents/GitHub/Forensic-Paper1/Paper1Citations",
+  filename = temp_file,
   tag_naming = "wos",
   return_df = TRUE,
+
   verbose = FALSE
 )
+
+# Optional: Remove the temporary file when done
+file.remove(temp_file)
+
+
 
 ```
 
