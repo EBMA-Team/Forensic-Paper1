@@ -1166,7 +1166,7 @@ Let's double check I've got the right survival figures at the 10 year mark using
 
 ```{r}
 
-SurvSum <- tbl_survfit(
+SurvSum <- gtsummary::tbl_survfit(
   Graftfit,
   times = c(5,7,10)
 )
@@ -1183,7 +1183,7 @@ SurvDT <- dt |> dplyr::mutate(
   group = if_else(group == "PT", "C","E")
   )
 
-SurvPowerChk <- powerCT(
+SurvPowerChk <- powerSurvEpi::powerCT(
   Surv(time, status) ~ group,
 	SurvDT,
 	90,
@@ -1459,16 +1459,12 @@ So now for the PT group we have an estimated mean of {round(AgeMeanPT,3)} and SD
 
 ```
 
-Plugged into the *rsprite2* functions gives and error that *the mean is not consistent with number of observations (fails GRIM test)*.
+Plugged into the *rsprite2* functions gives an error that *the mean is not consistent with number of observations (fails GRIM test)*.
 
-```{r}
-
-
-```
 
 Taking a step back and rerunning the grim test function produces a slightly adjusted mean instead.
 
-```{r}
+```{r, AgeGrimMean}
 
 rsprite2::GRIM_test(
   mean = AgeMeanPT,
@@ -1481,7 +1477,7 @@ rsprite2::GRIM_test(
 
 The standard deviation needed a bit of tweaking to pass the GRIMMER test. The value that passed was 5.855.
 
-```{r}
+```{r, AgeGrimSD}
 rsprite2::GRIMMER_test(
   mean = 26.244,
   sd = 5.855,
@@ -1496,10 +1492,10 @@ rsprite2::GRIMMER_test(
 
 PLugging the modified mean and SD back in;
 
-```{r}
+```{r, RSprite Age}
 
 
-AgeDistPT_Param <- set_parameters(
+AgeDistPT_Param <- rsprite2::set_parameters(
   mean = 26.244, 
   sd = 5.855, 
   n_obs = 90, 
@@ -1526,18 +1522,18 @@ So I still have questions about the age distribution as it doesnt fit the estima
 
 I also wanted to know if the proportion of females is generalisable, so I established the female proportion in both study groups combined (they are also the same between groups), compared with the New Zealand ACL Registry data in the latest report [@aclregistry2024].
 
-```{r}
+```{r, SexCheck}
 SexCheck <- list(
   Group = prop.test(42 + 43, 180, 0.95),
   NZRegistry = prop.test(8816,8816+11581,conf.level = 0.95)
 )
 ```
 
-```{epoxy}
+```{epoxy, GrimCheck}
 A quick GRIM check of the female proportion returns [{scrutiny::grim(as.character(SexCheck$Group$estimate*100), n = 180, percent = TRUE)}] 
 ```
 
-```{epoxy}
+```{epoxy, SexCompare}
 
 The proportion of females in the selected study {round(SexCheck$Group$estimate,2)} ({round(SexCheck$Group$conf.int[1],2)}, {round(SexCheck$Group$conf.int[2],2)}) is in line with the NZ ACL Registry {round(SexCheck$NZRegistry$estimate,2)} ({round(SexCheck$NZRegistry$conf.int[1],2)}, {round(SexCheck$NZRegistry$conf.int[2],2)})
 
@@ -1567,7 +1563,7 @@ What is of concern is the mixing of patient groups and eligibility criteria for 
 
 Let's try out some checks -see how far we get. Let's use *statcheck* package first, see if we can get a bite.
 
-```{r}
+```{r, StatCheck, execute = FALSE}
 statcheck::checkPDF("~/Pinczewski et al 2007.pdf")
 ```
 
