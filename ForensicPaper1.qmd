@@ -53,7 +53,7 @@ Overall, this article should probably be retired from public discourse as a prem
 
 Load up required packages in advance using *pacman* package (v`{r} utils::packageVersion("pacman")`) [@pacman]. Citations applied to each library at first use in the text.
 
-```{r}
+```{r, Prepare Packages}
 
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(
@@ -127,7 +127,7 @@ pacman::p_load(
 
 Pre-authorise access to registry datasets using the *gargle* package (v`{r} utils::packageVersion("gargle")`) [@gargle].
 
-```{r, echo = FALSE}
+```{r, Pre-authorisation, echo = FALSE}
 
 # Set the cache location
 options(gargle_oauth_cache = ".secrets")
@@ -137,7 +137,7 @@ drive_auth(email = "cscholes@ebma.com.au",
           cache = ".secrets")
 ```
 
-```{r, echo = FALSE}
+```{r, Authorisation Options, echo = FALSE}
 
 options(
   gargle_oauth_cache = ".secrets",
@@ -149,7 +149,7 @@ drive_auth(cache = ".secrets", email = TRUE)
 
 Cloned the RW git repo to the environment to bounce off later.
 
-```{r}
+```{r, Retrieve RW Database}
 
 # Set the repository URL and create a temporary directory
 repo_url <- "https://gitlab.com/crossref/retraction-watch-data"
@@ -191,7 +191,7 @@ CONSORT Outcomes Extension 2022 - [@butcher2022]
 
 [@pinczewski2007]
 
-```{r}
+```{r, TargetDOI}
 
 targetDOI = "10.1177/0363546506296042"
 
@@ -199,7 +199,7 @@ targetDOI = "10.1177/0363546506296042"
 
 Retrieve the full citation using the *rcrossref* package (v`{r} utils::packageVersion("rcrossref")`) [@rcrossref].
 
-```{epoxy}
+```{epoxy, Full Citation}
 
 {rcrossref::cr_cn(dois = targetDOI, format = "text", style = "apa")}
 
@@ -223,7 +223,7 @@ The burning question was how this paper is being cited in the contemporary liter
 
 I retrieved the citation list for this paper from *citationchaser* (the shiny app, I cant be bothered signing up for a plan for the API access) [@haddaway2022], which conducts a search through [lens.org](lens.org). Then draw in the bibliographic file with the *synthesisr* package (v`{r} utils::packageVersion("synthesisr")`) [@synthesisr].
 
-```{r, warning = FALSE, echo = FALSE}
+```{r, Retrieve Citations, warning = FALSE, echo = FALSE}
 
 # Define a temporary file location
 temp_file <- tempfile(fileext = ".bib")  # Assuming your citations are in BIB format
@@ -249,7 +249,7 @@ if(nrow(citation_file) > 0) {
 
 ```
 
-```{r}
+```{r, Read in Citations}
 
 # Read the citations using synthesisr from the temporary file
 Citations <- synthesisr::read_refs(
@@ -269,7 +269,7 @@ file.remove(temp_file)
 
 Then pull out the last couple of years of citations using *tidyverse* (v`{r} utils::packageVersion("tidyverse")`) [@tidyverse].
 
-```{r}
+```{r, Filter Citations}
 CitationRecent <- Citations |> dplyr::select(   year,   DO ) |> dplyr::filter(   year > 2022 )
 ```
 
@@ -283,22 +283,22 @@ The main takeaway is that the majority are *neutral* and mostly use the paper of
 
 Check if it appears in the RW database using *stringr* (v`{r} utils::packageVersion("stringr")`) [@stringr]
 
-```{r}
+```{r, Check Retractions Paper}
 
 TargetCitation <- rcrossref::cr_works(dois = "10.1177/0363546506296042")
 
 RWPaper <- Retractions |> dplyr::filter(
-  stringr::str_detect(OriginalPaperDOI,targetDOI) 
+  stringr::str_detect(OriginalPaperDOI,TargetCitation$data$doi) 
 )
 
 ```
 
 Combine an if loop with the *epoxy* package (v`{r} utils::packageVersion("epoxy")`) [@epoxy] to assess whether there are any retractions.
 
-```{r}
+```{r, Count Retractions}
 
 if_else(
-  length(RWPaper) < 1,
+  nrow(RWPaper) < 1,
   "No Retraction Found",
   epoxy::epoxy("There were {nrow(RWPaper)} retractions identified")
 )
@@ -324,7 +324,7 @@ So I wrote a function to work through the surnames and bounce them against the R
 
 You can see for yourself in the matches table below (maybe I missed one?).
 
-```{r}
+```{r, Retractions Author - Function}
 
 
 
@@ -482,14 +482,14 @@ clear_retraction_search_cache <- function() {
 
 Then pull out the search terms using *tidyverse.*
 
-```{r}
+```{r, Author Surname}
 # Extract just family names
 author_surnames <- TargetCitation$data$author[[1]] |>
   pull(family)
 
 ```
 
-```{r}
+```{r, Retractions Author}
 
 # For detailed progress messages
 progressr::handlers("txtprogressbar")
@@ -508,7 +508,7 @@ with_progress({
 
 Then present in a table using *gt* package (v`{r} utils::packageVersion("gt")`) [@gt].
 
-```{r}
+```{r, Author Matches}
 
 AuthorMatches <- results$matches
 
