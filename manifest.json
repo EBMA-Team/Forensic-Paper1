@@ -7828,7 +7828,10 @@
       "checksum": "05bdb783ee6514c8c072e47680af8ff7"
     },
     ".RData": {
-      "checksum": "6d2738108bcc03e5e202a5dcd876d040"
+      "checksum": "278ab94bfb7339bffec6e06c35341619"
+    },
+    ".secrets/c13dc354db9600c8cd9b2bd868d1bf25_cscholes@ebma.com.au": {
+      "checksum": "91f833f5665bdaa7a88b1bc9b12d3592"
     },
     "AJSM Metrics.png": {
       "checksum": "361a61354fdd52ea184bb19255ed496e"
@@ -7837,10 +7840,10 @@
       "checksum": "c4cc32a65269d0d5eb570c43ec17cf53"
     },
     "ForensicPaper1.html": {
-      "checksum": "5609b2a46b4927772df35931de78d7fa"
+      "checksum": "1ee6d35190b99f4c4f33bcfd567764c6"
     },
     "ForensicPaper1.qmd": {
-      "checksum": "ecb09c903f17f13813d1f1e9e024a985"
+      "checksum": "14f6f2949591e89af6baf5cbd3791448"
     },
     "ForensicPaper1_files/figure-html/unnamed-chunk-17-1.png": {
       "checksum": "fad51d8d908340ebf50d82900750170f"
@@ -7924,7 +7927,7 @@
       "checksum": "d828775275749701b48bd9d958814111"
     },
     "ForensicPapers.bib": {
-      "checksum": "9a3aad3780f29c94454db4dc09d7fbc2"
+      "checksum": "ed0dc3b0e5f130aa4cb11922f31d0bd0"
     },
     "Hefti1993 citations-2025-02-24.ris": {
       "checksum": "19c2ea6553ca201ec55661d3fdba4e6b"
@@ -7937,9 +7940,6 @@
     },
     "NZAgeDist.png": {
       "checksum": "97ffcf1df7c65ae70556842e65ffc700"
-    },
-    "Paper1Citations": {
-      "checksum": "fb08ba490961f4f740674751faa07ec7"
     },
     "Pinczewski et al. 2007.pdf": {
       "checksum": "68aa2e18a0472d1d21fc1818473b3efe"
