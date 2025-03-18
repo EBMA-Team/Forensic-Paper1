@@ -1200,6 +1200,36 @@
         "Built": "R 4.4.3; ; 2025-03-04 03:44:23 UTC; windows"
       }
     },
+    "cardx": {
+      "Source": "CRAN",
+      "Repository": "https://cran.csiro.au",
+      "description": {
+        "Package": "cardx",
+        "Title": "Extra Analysis Results Data Utilities",
+        "Version": "0.2.3",
+        "Authors@R": "c(\n    person(\"Daniel D.\", \"Sjoberg\", , \"danield.sjoberg@gmail.com\", role = c(\"aut\", \"cre\"),\n           comment = c(ORCID = \"0000-0003-0862-2018\")),\n    person(\"Abinaya\", \"Yogasekaram\", , \"abinaya.yogasekaram@contractors.roche.com\", role = \"aut\"),\n    person(\"Emily\", \"de la Rua\", , \"emily.de_la_rua@contractors.roche.com\", role = \"aut\"),\n    person(\"F. Hoffmann-La Roche AG\", role = c(\"cph\", \"fnd\"))\n  )",
+        "Description": "Create extra Analysis Results Data (ARD) summary objects.\n    The package supplements the simple ARD functions from the 'cards'\n    package, exporting functions to put statistical results in the ARD\n    format. These objects are used and re-used to construct summary\n    tables, visualizations, and written reports.",
+        "License": "Apache License 2.0",
+        "URL": "https://insightsengineering.github.io/cardx/,\nhttps://github.com/insightsengineering/cardx/",
+        "BugReports": "https://github.com/insightsengineering/cardx/issues",
+        "Depends": "R (>= 4.2)",
+        "Imports": "cards (>= 0.5.0), cli (>= 3.6.1), dplyr (>= 1.1.2), glue (>=\n1.6.2), lifecycle (>= 1.0.3), rlang (>= 1.1.1), tidyr (>=\n1.3.0)",
+        "Suggests": "aod (>= 1.3.3), broom (>= 1.0.5), broom.helpers (>= 1.17.0),\nbroom.mixed (>= 0.2.9), car (>= 3.1-2), effectsize (>= 0.8.8),\nemmeans (>= 1.7.3), geepack (>= 1.3.2), ggsurvfit (>= 1.1.0),\nlme4 (>= 1.1-35.3), parameters (>= 0.20.2), smd (>= 0.6.6),\nsurvey (>= 4.2), survival (>= 3.6-4), testthat (>= 3.2.0),\nwithr (>= 2.5.0)",
+        "Config/Needs/website": "insightsengineering/nesttemplate",
+        "Config/testthat/edition": "3",
+        "Config/testthat/parallel": "true",
+        "Encoding": "UTF-8",
+        "Language": "en-US",
+        "RoxygenNote": "7.3.2",
+        "NeedsCompilation": "no",
+        "Packaged": "2025-02-17 23:20:27 UTC; sjobergd",
+        "Author": "Daniel D. Sjoberg [aut, cre] (<https://orcid.org/0000-0003-0862-2018>),\n  Abinaya Yogasekaram [aut],\n  Emily de la Rua [aut],\n  F. Hoffmann-La Roche AG [cph, fnd]",
+        "Maintainer": "Daniel D. Sjoberg <danield.sjoberg@gmail.com>",
+        "Repository": "CRAN",
+        "Date/Publication": "2025-02-18 08:20:09 UTC",
+        "Built": "R 4.4.2; ; 2025-02-18 23:58:51 UTC; windows"
+      }
+    },
     "cellranger": {
       "Source": "CRAN",
       "Repository": "https://cran.csiro.au",
@@ -7831,7 +7861,7 @@
       "checksum": "278ab94bfb7339bffec6e06c35341619"
     },
     ".secrets/c13dc354db9600c8cd9b2bd868d1bf25_cscholes@ebma.com.au": {
-      "checksum": "91f833f5665bdaa7a88b1bc9b12d3592"
+      "checksum": "603faa14ffb2e1630b5cc1d63f076427"
     },
     "AJSM Metrics.png": {
       "checksum": "361a61354fdd52ea184bb19255ed496e"
@@ -7840,10 +7870,10 @@
       "checksum": "c4cc32a65269d0d5eb570c43ec17cf53"
     },
     "ForensicPaper1.html": {
-      "checksum": "1ee6d35190b99f4c4f33bcfd567764c6"
+      "checksum": "f5b1f4b5e513a7b04fa89a9b26994d79"
     },
     "ForensicPaper1.qmd": {
-      "checksum": "14f6f2949591e89af6baf5cbd3791448"
+      "checksum": "972b4f57d2ef437f56ab25cef99d2808"
     },
     "ForensicPaper1_files/figure-html/unnamed-chunk-17-1.png": {
       "checksum": "fad51d8d908340ebf50d82900750170f"
@@ -7888,7 +7918,7 @@
       "checksum": "893992ac26a95eff3b2ab1397fde3f4f"
     },
     "ForensicPaper1_files/figure-html/unnamed-chunk-37-1.png": {
-      "checksum": "93302481021ed4aacf7c1ec9aed23d59"
+      "checksum": "893992ac26a95eff3b2ab1397fde3f4f"
     },
     "ForensicPaper1_files/figure-html/unnamed-chunk-40-1.png": {
       "checksum": "93302481021ed4aacf7c1ec9aed23d59"

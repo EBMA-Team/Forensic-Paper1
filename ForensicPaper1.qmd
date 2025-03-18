@@ -57,6 +57,7 @@ Load up required packages in advance using *pacman* package (v`{r} utils::packag
 
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load(
+  "cardx",
   "parallelly",
   "gargle",
   "googledrive",
