@@ -327,8 +327,6 @@ You can see for yourself in the matches table below (maybe I missed one?).
 ```{r, Retractions Author - Function}
 
 
-
-# Set up parallel processing
 setup_parallel <- function(cores = NULL) {
   # Check for cloud environments or system limitations
   max_allowed_cores <- parallelly::availableCores()
@@ -336,17 +334,20 @@ setup_parallel <- function(cores = NULL) {
   if (is.null(cores)) {
     # Use 1 less than available, but respect system limits
     cores <- min(parallel::detectCores() - 1, max_allowed_cores)
+    # Ensure at least 1 core is used
+    cores <- max(cores, 1)
   } else {
     # Make sure user-specified cores don't exceed limits
     cores <- min(cores, max_allowed_cores)
   }
   
-  plan(multisession, workers = cores)
+  # Set up the future plan
+  future::plan(future::multisession, workers = cores)
 }
 
-# Create memoized helper functions
-mem_stringdist <- memoise::memoise(stringdist)
-mem_str_detect <- memoise::memoise(str_detect)
+# Create memoized helper functions with explicit namespace references
+mem_stringdist <- memoise::memoise(stringdist::stringdist)
+mem_str_detect <- memoise::memoise(stringr::str_detect)
 
 search_retractions_by_authors <- function(author_names, 
                                         retraction_data, 
@@ -354,163 +355,206 @@ search_retractions_by_authors <- function(author_names,
                                         date_from = NULL,
                                         date_to = NULL,
                                         cores = NULL) {
-  
+
   # Initialize parallel processing
   setup_parallel(cores)
   
-  # Progress function wrapped in with_progress
-  with_progress({
-    p <- progressor(steps = 4)
-    
-    # Convert author names to lowercase for case-insensitive matching
-    author_names_lower <- tolower(author_names)
-    p(amount = 1, message = "Initializing...")
-    
-    # Process retraction data
-    matching_retractions <- retraction_data %>%
-      # Convert dates to proper format
-      mutate(
-        RetractionDate = as.Date(RetractionDate, format = "%m/%d/%Y"),
-        OriginalPaperDate = as.Date(OriginalPaperDate, format = "%m/%d/%Y")
-      ) %>%
-      # Apply date filters if provided
-      {if (!is.null(date_from)) filter(., RetractionDate >= as.Date(date_from)) else .} %>%
-      {if (!is.null(date_to)) filter(., RetractionDate <= as.Date(date_to)) else .} %>%
-      # Convert Author column to lowercase for matching
-      mutate(authors_lower = tolower(Author))
-    
-    p(amount = 1, message = "Processing data...")
-    
-    # Perform exact matching
-    matching_retractions <- matching_retractions %>%
-      mutate(
-        exact_matches = future_map_chr(
-          authors_lower,
-          function(author_string) {
-            matches <- author_names_lower[sapply(author_names_lower, function(name) {
-              str_detect(author_string, str_c("\\b", name, "\\b"))
-            })]
-            str_c(matches, collapse = "; ")
-          },
-          .progress = TRUE
-        )
+  # Don't nest with_progress calls - move this outside if calling from another function
+  # that already uses with_progress
+  p <- progressr::progressor(steps = 4)
+  p(amount = 1, message = "Initializing...")
+  
+  # Convert author names to lowercase for case-insensitive matching
+  author_names_lower <- tolower(author_names)
+  
+  # Process retraction data
+  matching_retractions <- retraction_data %>%
+    # Convert dates to proper format - handle potential NA values
+    mutate(
+      RetractionDate = as.Date(RetractionDate, format = "%m/%d/%Y"),
+      OriginalPaperDate = as.Date(OriginalPaperDate, format = "%m/%d/%Y")
+    ) 
+  
+  # Apply date filters if provided (with error handling)
+  if (!is.null(date_from)) {
+    date_from_parsed <- try(as.Date(date_from), silent = TRUE)
+    if (!inherits(date_from_parsed, "try-error") && !is.na(date_from_parsed)) {
+      matching_retractions <- matching_retractions %>% 
+        filter(!is.na(RetractionDate) & RetractionDate >= date_from_parsed)
+    }
+  }
+  
+  if (!is.null(date_to)) {
+    date_to_parsed <- try(as.Date(date_to), silent = TRUE)
+    if (!inherits(date_to_parsed, "try-error") && !is.na(date_to_parsed)) {
+      matching_retractions <- matching_retractions %>% 
+        filter(!is.na(RetractionDate) & RetractionDate <= date_to_parsed)
+    }
+  }
+  
+  # Convert Author column to lowercase for matching
+  matching_retractions <- matching_retractions %>%
+    mutate(authors_lower = tolower(Author))
+  
+  p(amount = 1, message = "Processing data...")
+  
+  # Use safer versions of the string operations with error handling
+  matching_retractions <- matching_retractions %>%
+    mutate(
+      exact_matches = furrr::future_map_chr(
+        authors_lower,
+        function(author_string) {
+          if (is.na(author_string)) return("")
+          
+          matches <- author_names_lower[sapply(author_names_lower, function(name) {
+            stringr::str_detect(author_string, stringr::str_c("\\b", name, "\\b"))
+          })]
+          stringr::str_c(matches, collapse = "; ")
+        },
+        .options = furrr::furrr_options(seed = TRUE)
       )
-    
-    p(amount = 1, message = "Performing exact matching...")
-    
-    # Perform fuzzy matching
-    matching_retractions <- matching_retractions %>%
-      mutate(
-        fuzzy_matches = future_map_chr(
-          authors_lower,
-          function(author_string) {
-            individual_authors <- str_split(author_string, ";")[[1]] %>%
-              str_trim()
-            
-            matches <- author_names_lower[sapply(author_names_lower, function(search_name) {
-              min_dist <- min(sapply(individual_authors, function(x) 
-                stringdist(x, search_name, method = "jw")))
-              min_dist <= fuzzy_threshold
-            })]
-            
-            str_c(unique(matches), collapse = "; ")
-          },
-          .progress = TRUE
-        )
+    )
+  
+  p(amount = 1, message = "Performing exact matching...")
+  
+  # Perform fuzzy matching with error handling
+  matching_retractions <- matching_retractions %>%
+    mutate(
+      fuzzy_matches = furrr::future_map_chr(
+        authors_lower,
+        function(author_string) {
+          if (is.na(author_string)) return("")
+          
+          individual_authors <- stringr::str_split(author_string, ";")[[1]] %>%
+            stringr::str_trim()
+          
+          matches <- author_names_lower[sapply(author_names_lower, function(search_name) {
+            min_dist <- min(sapply(individual_authors, function(x) 
+              stringdist::stringdist(x, search_name, method = "jw")), na.rm = TRUE)
+            !is.na(min_dist) && min_dist <= fuzzy_threshold
+          })]
+          
+          stringr::str_c(unique(matches), collapse = "; ")
+        },
+        .options = furrr::furrr_options(seed = TRUE)
       )
-    
-    p(amount = 1, message = "Performing fuzzy matching...")
-    
-    # Filter and select columns
-    results <- matching_retractions %>%
-      filter(exact_matches != "" | fuzzy_matches != "") %>%
-      select(
-        Title,
-        Author,
-        exact_matches,
-        fuzzy_matches,
-        Journal,
-        Publisher,
-        Country,
-        RetractionDate,
-        OriginalPaperDate,
-        RetractionDOI,
-        OriginalPaperDOI,
-        Reason,
-        everything(),
-        -authors_lower
-      )
-    
-    # Generate summary statistics
-    summary_stats <- list(
-      total_matches = nrow(results),
-      matches_by_year = results %>%
-        mutate(year = format(RetractionDate, "%Y")) %>%
-        count(year, name = "retractions") %>%
-        arrange(desc(year)),
-      matches_by_publisher = results %>%
-        count(Publisher, sort = TRUE, name = "retractions"),
-      matches_by_country = results %>%
-        count(Country, sort = TRUE, name = "retractions"),
-      exact_vs_fuzzy = c(
-        exact = sum(results$exact_matches != ""),
-        fuzzy_only = sum(results$exact_matches == "" & results$fuzzy_matches != "")
-      ),
-      date_range = c(
+    )
+  
+  p(amount = 1, message = "Performing fuzzy matching...")
+  
+  # Filter and select columns
+  results <- matching_retractions %>%
+    filter(exact_matches != "" | fuzzy_matches != "") %>%
+    select(
+      Title,
+      Author,
+      exact_matches,
+      fuzzy_matches,
+      Journal,
+      Publisher,
+      Country,
+      RetractionDate,
+      OriginalPaperDate,
+      RetractionDOI,
+      OriginalPaperDOI,
+      Reason,
+      everything(),
+      -authors_lower
+    )
+  
+  # Generate summary statistics with error handling
+  summary_stats <- list(
+    total_matches = nrow(results),
+    matches_by_year = results %>%
+      mutate(year = format(RetractionDate, "%Y")) %>%
+      count(year, name = "retractions") %>%
+      arrange(desc(year)),
+    matches_by_publisher = results %>%
+      count(Publisher, sort = TRUE, name = "retractions"),
+    matches_by_country = results %>%
+      count(Country, sort = TRUE, name = "retractions"),
+    exact_vs_fuzzy = c(
+      exact = sum(results$exact_matches != "", na.rm = TRUE),
+      fuzzy_only = sum(results$exact_matches == "" & results$fuzzy_matches != "", na.rm = TRUE)
+    ),
+    date_range = if(nrow(results) > 0) {
+      c(
         min = min(results$RetractionDate, na.rm = TRUE),
         max = max(results$RetractionDate, na.rm = TRUE)
       )
-    )
-    
-    # Return results within with_progress
-    list(
-      matches = results,
-      summary = summary_stats
-    )
-  })
+    } else {
+      c(min = NA, max = NA)
+    }
+  )
+  
+  # Return results
+  list(
+    matches = results,
+    summary = summary_stats
+  )
 }
 
 # Clear memoization cache function
 clear_retraction_search_cache <- function() {
-  forget(mem_stringdist)
-  forget(mem_str_detect)
+  memoise::forget(mem_stringdist)
+  memoise::forget(mem_str_detect)
   gc()  # Run garbage collection
 }
-
 
 ```
 
 Then pull out the search terms using *tidyverse.*
 
-```{r, Author Surname}
+```{r, Retractions Author Surname}
+# Set up handlers for progress reporting
+
+handlers(handler_progress(
+  format = ":spin :current/:total (:message) [:bar] :percent in :elapsed ETA: :eta",
+  width = 100
+))
+
 # Extract just family names
 author_surnames <- TargetCitation$data$author[[1]] |>
   pull(family)
 
-```
-
-```{r, Retractions Author}
-
-# For detailed progress messages
-progressr::handlers("txtprogressbar")
-
-# Run the search with progress reporting
-with_progress({
-  results <- search_retractions_by_authors(
+# Run the search with more error handling
+search_results <- tryCatch({
+  # Don't nest with_progress here since it's already used in the function
+  search_retractions_by_authors(
     author_surnames,
     Retractions,
-    fuzzy_threshold = 0.2,
+    fuzzy_threshold = 0.2, 
     date_from = "2020-01-01",
-    date_to = "2024-12-31"
+    date_to = "2024-12-31",
+    cores = 2  # Limit cores explicitly for Connect environment
+  )
+}, error = function(e) {
+  # Print the error
+  message("Error in search: ", e$message)
+  # Return empty results as fallback
+  list(
+    matches = tibble(),
+    summary = list(
+      total_matches = 0,
+      matches_by_year = tibble(year = character(0), retractions = integer(0)),
+      matches_by_publisher = tibble(Publisher = character(0), retractions = integer(0)),
+      matches_by_country = tibble(Country = character(0), retractions = integer(0)),
+      exact_vs_fuzzy = c(exact = 0, fuzzy_only = 0),
+      date_range = c(min = NA, max = NA)
+    )
   )
 })
+
+# Access the results
+AuthorMatches <- search_results$matches
+summary_stats <- search_results$summary
+
 ```
 
 Then present in a table using *gt* package (v`{r} utils::packageVersion("gt")`) [@gt].
 
 ```{r, Author Matches}
 
-AuthorMatches <- results$matches
 
 gt::gt(AuthorMatches |> dplyr::select(
   Title,
