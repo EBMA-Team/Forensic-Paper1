@@ -4,7 +4,7 @@ author: "Corey Scholes"
 affiliation: "EBM Analytics"
 version: 1.0
 date: "2025-Feb-15"
-date-modified: "2025-Feb-15"
+date-modified: "2025-Mar-18"
 type: website
 editor: visual
 code-annotations: true
@@ -623,8 +623,6 @@ Study with follow up at 7 years - [@roe2005]
 Study with follow up at 5 years - [@pinczewski2002]
 
 Study with follow up at 2 years - [@corry1999]
-
-The role of a data monitoring committee.
 
 ## CONSORT \[25\] Funding
 
