@@ -47,7 +47,7 @@ The article has not been retracted, not have any comments been made about it on 
 
 It is an attempted randomised (partial randomisation) comparison between two sources of graft material for ACL reconstruction that is potentially influenced by bias in patient selection, lack of blinding and multiplicity of analyses for outcomes that have not been pre-registered. The aims and objectives are not sufficiently specific or structured to allow adequate assessment of the analysis. It is likely that the study never existed in a state of clinical equipoise with respect to the treatment options, or the risk-benefits of each option were not fully understood at the time. Inclusion/exclusion criteria for several analyses have been altered between followup reports on the same cohort and many of the findings still being cited in the contemporary literature are not supported when considering the issues with the statistical analysis and the lack of sample size (power) calculation prior to patient recruitment. The key findings are vulnerable to competing risks (e.g. graft survival) and many cited findings rely on poorly reported regression analyses, where their interpretation has been subject to the Table 2 fallacy.
 
-Overall, this article should probably be retired from public discourse as a premature, poorly designed and haphazardly reported comparison between an emerging (at the time of recruitment) treatment option compared to the accepted standard for ACL rupture in patients presenting for surgical review. Patient preference for short-term function restoration balanced against potential of elevated risk of re-rupture remains an under-explored component of establishing clinical equipoise in this patient population.
+Overall, this article should probably be retired from public discourse as a premature trial, that lacked robust design and was haphazardly reported, which compared an emerging (at the time of recruitment) treatment option compared to the accepted standard for ACL rupture in patients presenting for surgical review. Patient preference for short-term function restoration balanced against potential of elevated risk of re-rupture remains an under-explored component of establishing clinical equipoise in this patient population.
 
 ## Preparation
 
@@ -168,7 +168,6 @@ git_clone(
 data_file_path <- file.path(repo_path, "retraction_watch.csv")
 Retractions <- read.csv(data_file_path)
 ```
-
 
 ## Reporting Framework
 
@@ -1505,7 +1504,6 @@ So now for the PT group we have an estimated mean of {round(AgeMeanPT,3)} and SD
 ```
 
 Plugged into the *rsprite2* functions gives an error that *the mean is not consistent with number of observations (fails GRIM test)*.
-
 
 Taking a step back and rerunning the grim test function produces a slightly adjusted mean instead.
 
